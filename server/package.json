@@ -1,0 +1,40 @@
+{
+  "name": "edu21-server",
+  "version": "1.1.0",
+  "description": "EDU21 Backend API Server",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "build": "echo 'Server build complete'",
+    "test": "jest",
+    "load-demo": "node scripts/load-demo-data.js",
+    "create-demo-games": "node scripts/create-demo-games.js",
+    "setup-complete-demo": "npm run load-demo && npm run create-demo-games"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.33.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^6.11.2",
+    "helmet": "^7.2.0",
+    "joi": "^17.9.2",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2",
+    "node-cron": "^4.1.1",
+    "openai": "^5.8.4",
+    "pdfkit": "^0.13.0",
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^6.3.3"
+  }
+}
