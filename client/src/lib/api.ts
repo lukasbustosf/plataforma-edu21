@@ -215,6 +215,58 @@ class ApiService {
     return this.request('DELETE', `/quiz/${quizId}/questions/${questionId}`)
   }
 
+  // Question Bank APIs
+  async createQuestionInBank(question: Partial<Question>): Promise<Question> {
+    return this.request('POST', '/question-bank', question)
+  }
+
+  async getQuestionsFromBank(): Promise<Question[]> {
+    return this.request('GET', '/question-bank')
+  }
+
+  async deleteQuestionFromBank(id: string): Promise<void> {
+    return this.request('DELETE', `/question-bank/${id}`)
+  }
+
+  async updateQuestionInBank(id: string, question: Partial<Question>): Promise<Question> {
+    return this.request('PUT', `/question-bank/${id}`, question)
+  }
+
+  // My Evaluations APIs
+  async createEvaluation(evaluation: { title: string, description: string, questionIds: string[] }): Promise<any> {
+    return this.request('POST', '/my-evaluations', evaluation)
+  }
+
+  async getMyEvaluations(): Promise<any[]> {
+    return this.request('GET', '/my-evaluations')
+  }
+
+  
+
+  async getStudentAssignments(studentId: string): Promise<any[]> {
+    return this.request('GET', `/my-evaluations/student-assignments/${studentId}`)
+  }
+
+  async getGameEngines(): Promise<any[]> {
+    return this.request('GET', '/my-evaluations/engines')
+  }
+
+  async assignEvaluation(data: { evaluationId: string, classIds: string[], dueDate: string, engineId: string }): Promise<{ gameSessionId: string }> {
+    return this.request('POST', '/my-evaluations/assign', data)
+  }
+
+  async getEvaluationForStudent(sessionId: string): Promise<any> {
+    return this.request('GET', `/evaluation/student/${sessionId}/details`);
+  }
+
+  async getGameSessionForPlay(sessionId: string): Promise<any> {
+    return this.request('GET', `/evaluation/student/${sessionId}/play`);
+  }
+
+  async submitEvaluationAttempt(sessionId: string, score: number, results: any): Promise<any> {
+    return this.request('POST', '/evaluation/submit-attempt', { sessionId, score, results });
+  }
+
   // Game Session APIs
   async createGameSession(data: {
     quiz_id: string
@@ -528,18 +580,18 @@ class ApiService {
 
   // Notification APIs
   async getNotifications(): Promise<{
-    notifications: any[]
-    unread_count: number
+    notifications: any[];
+    unread_count: number;
   }> {
-    return this.request('GET', '/notifications')
+    return this.request('GET', '/notifications');
   }
 
   async markNotificationRead(id: string): Promise<void> {
-    return this.request('PATCH', `/notifications/${id}/read`)
+    return this.request('PATCH', `/notifications/${id}/read`);
   }
 
   async markAllNotificationsRead(): Promise<void> {
-    return this.request('PATCH', '/notifications/read-all')
+    return this.request('PATCH', '/notifications/read-all');
   }
 
   // Settings APIs

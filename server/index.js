@@ -40,6 +40,8 @@ const curriculumRoutes = require('./routes/curriculum');
 const reportRoutes = require('./routes/reports');
 const evaluationRoutes = require('./routes/evaluation');
 const oaRoutes = require('./routes/oa');
+const questionBankRoutes = require('./routes/questionBank');
+const notificationRoutes = require('./routes/notifications'); // New import
 const { authenticateToken } = require('./middleware/auth');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const logger = require('./utils/logger');
@@ -96,9 +98,12 @@ app.use('/api/curriculum', authenticateToken, curriculumRoutes);
 app.use('/api/reports', authenticateToken, reportRoutes);
 app.use('/api/evaluation', authenticateToken, evaluationRoutes);
 app.use('/api/oa', authenticateToken, oaRoutes);
+app.use('/api/question-bank', authenticateToken, questionBankRoutes);
+app.use('/api/notifications', authenticateToken, notificationRoutes); // New route
 app.use('/api/demo', authenticateToken, require('./routes/demo'));
 app.use('/api/skins', require('./routes/skins'));
 app.use('/api/security', require('./routes/security'));
+app.use('/api/my-evaluations', authenticateToken, require('./routes/myEvaluations'));
 
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

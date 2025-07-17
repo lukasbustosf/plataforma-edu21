@@ -5,14 +5,13 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// 🔧 TEMPORARILY FORCE MOCK MODE - NO SUPABASE CONNECTIONS
-console.log('🔧 FORCED MOCK MODE: Supabase connections disabled for testing');
+// Initialize Supabase client for client-side (anon key)
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Force all connections to null to use mock data only
-let supabase = null;
-let supabaseAdmin = null;
+// Initialize Supabase client with service role key for admin operations
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 module.exports = {
   supabase,
   supabaseAdmin
-}; 
+};

@@ -578,6 +578,44 @@ async function loadDemoData() {
           total_questions: 4
         },
         title: 'Ciencias - Board Race Demo'
+      },
+      {
+        session_id: 'oa1-mat-evaluar', // Using the game ID as session ID for direct access
+        school_id: schoolId,
+        quiz_id: '550e8400-e29b-41d4-a716-446655440030', // Re-using math quiz
+        host_id: '550e8400-e29b-41d4-a716-446655440003',
+        format: 'custom', // Custom format for engine-based games
+        engine_id: 'ENG01',
+        status: 'active', // Set to active so it can be played directly
+        settings_json: {
+          session_code: 'OA1EVAL',
+          max_players: 1,
+          time_limit: 999,
+          specialized_component: 'FarmCountingGameOA1Evaluar',
+          theme: 'granja_oa1_v2',
+          version: '2.0',
+          total_questions: 5
+        },
+        title: 'OA1 MAT - Evaluar (Demo)'
+      },
+      {
+        session_id: 'oa1-mat-crear', // Using the game ID as session ID for direct access
+        school_id: schoolId,
+        quiz_id: '550e8400-e29b-41d4-a716-446655440030', // Re-using math quiz
+        host_id: '550e8400-e29b-41d4-a716-446655440003',
+        format: 'custom',
+        engine_id: 'ENG01',
+        status: 'active', // Set to active so it can be played directly
+        settings_json: {
+          session_code: 'OA1CREAR',
+          max_players: 1,
+          time_limit: 999,
+          specialized_component: 'FarmCountingGameOA1Crear',
+          theme: 'granja_oa1_v2',
+          version: '2.0',
+          total_questions: 5
+        },
+        title: 'OA1 MAT - Crear (Demo)'
       }
     ];
     

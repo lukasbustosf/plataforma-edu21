@@ -71,6 +71,7 @@ export type UserRole =
 // ===============================================
 
 export interface GradeLevel {
+  id: string;
   grade_code: string;
   grade_name: string;
   level_type: 'PARVULO' | 'BASICA' | 'MEDIA';
@@ -83,6 +84,7 @@ export interface GradeLevel {
 }
 
 export interface Subject {
+  id: string;
   subject_id: string;
   subject_code: string;
   subject_name: string;
@@ -95,6 +97,7 @@ export interface Subject {
 }
 
 export interface LearningObjective {
+  id: string;
   oa_id: string;
   oa_code: string;
   oa_desc: string;
@@ -726,7 +729,7 @@ export interface Question {
   question_order: number;
   stem_md: string;
   type: QuestionType;
-  options_json: string[];
+  options_json: Array<{ text: string; is_correct: boolean; }>;
   correct_answer?: string;
   explanation?: string;
   points: number;
@@ -753,6 +756,11 @@ export interface Question {
   };
   
   created_at: string;
+  source?: string;
+  subject?: any;
+  grade?: any;
+  learning_objective?: any;
+  question_type?: any;
   
   // Relations
   question_learning_objectives?: QuestionLearningObjective[];

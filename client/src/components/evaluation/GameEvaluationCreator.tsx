@@ -21,78 +21,29 @@ import {
 } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import OASelector from '@/components/ui/OASelector'
+import QuestionBankSelector from '@/components/evaluation/QuestionBankSelector' // New import
 import type { BloomLevel, GameFormat } from '@/types'
 
 // Configuración de engines disponibles
-const ENGINES = [
+const GAME_TEMPLATES = [
   {
-    id: 'ENG01',
-    name: 'Contador/Línea Numérica',
-    description: 'Enfoque en conteo y números. Ideal para matemáticas básicas.',
+    id: 'FarmCountingGameOA1Analyze',
+    name: 'Granja: Conteo y Análisis',
+    description: 'Juego de conteo y análisis de patrones con temática de granja.',
     subject: 'Matemáticas',
-    icon: '🔢',
-    color: 'blue',
-    formats: ['trivia_lightning', 'number_line_race', 'color_match']
-  },
-  {
-    id: 'ENG02',
-    name: 'Operaciones Básicas',
-    description: 'Suma, resta y operaciones con manipulables.',
-    subject: 'Matemáticas',
-    icon: '➕',
+    icon: '🐄',
     color: 'green',
-    formats: ['trivia_lightning', 'memory_flip', 'drag_drop_sorting', 'number_line_race']
   },
-  {
-    id: 'ENG05',
-    name: 'Reconocimiento de Texto',
-    description: 'Letras, palabras y comprensión lectora.',
-    subject: 'Lenguaje',
-    icon: '📝',
-    color: 'purple',
-    formats: ['trivia_lightning', 'memory_flip', 'color_match', 'word_builder']
-  }
-]
-
-// Configuración de formatos de juego disponibles
-const GAME_FORMATS = {
-  'trivia_lightning': {
-    name: 'Trivia Relámpago',
-    description: 'Preguntas rápidas con tiempo limitado',
-    icon: '⚡',
-    estimatedTime: 15
-  },
-  'memory_flip': {
-    name: 'Memorice',
-    description: 'Encuentra las parejas correspondientes',
-    icon: '🧩',
-    estimatedTime: 20
-  },
-  'drag_drop_sorting': {
-    name: 'Clasificar Arrastrando',
-    description: 'Organiza elementos en categorías',
-    icon: '🎯',
-    estimatedTime: 18
-  },
-  'number_line_race': {
-    name: 'Carrera Numérica',
-    description: 'Progresión en línea numérica',
-    icon: '🏃',
-    estimatedTime: 12
-  },
-  'color_match': {
-    name: 'Combinación de Colores',
-    description: 'Asocia elementos por color o categoría',
-    icon: '🎨',
-    estimatedTime: 14
-  },
-  'word_builder': {
-    name: 'Constructor de Palabras',
-    description: 'Forma palabras con letras y sílabas',
-    icon: '🔠',
-    estimatedTime: 22
-  }
-}
+  // Add other game templates here as they are created
+  // {
+  //   id: 'Oa1MatAplicarGame',
+  //   name: 'Matemáticas: Aplicar Conceptos',
+  //   description: 'Juego para aplicar conceptos matemáticos básicos.',
+  //   subject: 'Matemáticas',
+  //   icon: '📐',
+  //   color: 'blue',
+  // },
+];
 
 // Configuración de skins disponibles
 const SKINS = [
@@ -194,8 +145,9 @@ export function GameEvaluationCreator({
     time_limit: 30,
     oa_codes: [] as string[],
     bloom_levels: ['Comprender'] as BloomLevel[],
-    engine_id: 'ENG01',
-    skin_theme: 'granja'
+    engine_id: 'FarmCountingGameOA1Analyze', // Now stores the game template ID
+    skin_theme: 'granja',
+    selectedQuestionIds: [] as string[], // New: IDs of manually selected questions
   })
   
   const [loading, setLoading] = useState(false)
@@ -238,9 +190,18 @@ export function GameEvaluationCreator({
         break
       
       case 2:
-        if (!formData.engine_id) errors.engine_id = 'Debe seleccionar un engine'
+        if (!formData.engine_id) errors.engine_id = 'Debe seleccionar una plantilla de juego'
         if (!formData.skin_theme) errors.skin_theme = 'Debe seleccionar un skin'
         break
+      
+      case 3:
+        // No specific validation for step 3 yet, but can add if needed
+        break;
+
+      case 4:
+        // Validation for question selection step
+        // For now, it's optional to select questions, so no validation here
+        break;
     }
     
     setValidationErrors(errors)
@@ -264,18 +225,13 @@ export function GameEvaluationCreator({
     try {
       const token = localStorage.getItem('token')
       
-      // Get the available formats for the selected engine
-      const selectedEngine = ENGINES.find(e => e.id === formData.engine_id)
-      const availableFormats = selectedEngine?.formats || []
-      const game_format = availableFormats[0] // Use the first available format
-
       const evaluationData = {
         title: formData.title,
         description: formData.description,
         class_id: formData.class_id,
         type: 'gamified',
-        game_format,
-        engine_id: formData.engine_id,
+        game_format: formData.engine_id, // Use engine_id as game_format
+        engine_id: formData.engine_id,   // Use engine_id as game_template_id
         skin_theme: formData.skin_theme,
         oa_codes: formData.oa_codes,
         bloom_levels: formData.bloom_levels,
@@ -286,7 +242,8 @@ export function GameEvaluationCreator({
           subject: formData.subject,
           grade_level: formData.grade_level,
           difficulty: formData.difficulty
-        }
+        },
+        manual_question_ids: formData.selectedQuestionIds, // New: Pass selected question IDs
       }
 
       console.log('🎮 Creating gamified evaluation:', evaluationData)
@@ -359,7 +316,7 @@ export function GameEvaluationCreator({
     }
   }
 
-  const getSelectedEngine = () => ENGINES.find(e => e.id === formData.engine_id)
+  const getSelectedEngine = () => GAME_TEMPLATES.find(e => e.id === formData.engine_id)
   const getSelectedSkin = () => SKINS.find(s => s.id === formData.skin_theme)
   const getSelectedClass = () => availableClasses.find(c => c.class_id === formData.class_id)
 
@@ -510,37 +467,37 @@ export function GameEvaluationCreator({
     <div className="space-y-6">
       <div className="text-center mb-8">
         <CogIcon className="mx-auto h-16 w-16 text-green-500 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900">Configuración del Juego</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Selección de Plantilla de Juego</h2>
         <p className="text-gray-600 mt-2">
-          Selecciona el engine educativo y la temática visual
+          Elige la experiencia de juego que tus estudiantes disfrutarán
         </p>
       </div>
 
-      {/* Selección de Engine */}
+      {/* Selección de Plantilla de Juego */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-4">
-          Engine Educativo *
+          Plantilla de Juego *
         </label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {ENGINES.map((engine) => (
+          {GAME_TEMPLATES.map((template) => (
             <div
-              key={engine.id}
+              key={template.id}
               className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                formData.engine_id === engine.id
+                formData.engine_id === template.id
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
-              onClick={() => setFormData({ ...formData, engine_id: engine.id })}
+              onClick={() => setFormData({ ...formData, engine_id: template.id })}
             >
               <div className="text-center">
-                <div className="text-3xl mb-2">{engine.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-1">{engine.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{engine.description}</p>
+                <div className="text-3xl mb-2">{template.icon}</div>
+                <h3 className="font-semibold text-gray-900 mb-1">{template.name}</h3>
+                <p className="text-sm text-gray-600 mb-2">{template.description}</p>
                 <span className={`inline-block px-2 py-1 rounded text-xs font-medium
-                  ${engine.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                    engine.color === 'green' ? 'bg-green-100 text-green-800' :
+                  ${template.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                    template.color === 'green' ? 'bg-green-100 text-green-800' :
                     'bg-purple-100 text-purple-800'}`}>
-                  {engine.subject}
+                  {template.subject}
                 </span>
               </div>
             </div>
@@ -552,24 +509,7 @@ export function GameEvaluationCreator({
       </div>
 
       {/* Preview de formatos disponibles */}
-      {formData.engine_id && (
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">
-            Formatos de juego disponibles para {getSelectedEngine()?.name}:
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {getSelectedEngine()?.formats.map((formatId) => {
-              const format = GAME_FORMATS[formatId as keyof typeof GAME_FORMATS]
-              return (
-                <span key={formatId} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                  <span>{format.icon}</span>
-                  <span>{format.name}</span>
-                </span>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      {/* This section is no longer relevant as the game template defines the format */}
 
       {/* Selección de Skin */}
       <div>
@@ -689,7 +629,7 @@ export function GameEvaluationCreator({
             <span className="font-medium">{formData.oa_codes.length} objetivos</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Engine:</span>
+            <span className="text-gray-600">Plantilla de Juego:</span>
             <span className="font-medium">{getSelectedEngine()?.name}</span>
           </div>
           <div className="flex justify-between">
@@ -702,6 +642,24 @@ export function GameEvaluationCreator({
           </div>
         </div>
       </div>
+    </div>
+  )
+
+  const renderStep4 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <PuzzlePieceIcon className="mx-auto h-16 w-16 text-orange-500 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-900">Selección de Preguntas</h2>
+        <p className="text-gray-600 mt-2">
+          Elige preguntas de tu banco o deja que la IA genere automáticamente.
+        </p>
+      </div>
+
+      {/* Question Selector Component will go here */}
+      <QuestionBankSelector
+        selectedQuestionIds={formData.selectedQuestionIds}
+        onQuestionIdsChange={(ids) => setFormData(prev => ({ ...prev, selectedQuestionIds: ids }))}
+      />
     </div>
   )
 
@@ -734,7 +692,7 @@ export function GameEvaluationCreator({
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {[1, 2, 3].map((step) => (
+          {[1, 2, 3, 4].map((step) => (
             <div key={step} className="flex items-center">
               <div className={`
                 w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
@@ -749,7 +707,7 @@ export function GameEvaluationCreator({
                   step
                 )}
               </div>
-              {step < 3 && (
+              {step < 4 && (
                 <div className={`
                   w-24 lg:w-32 h-1 mx-2
                   ${currentStep > step ? 'bg-blue-500' : 'bg-gray-200'}
@@ -768,6 +726,9 @@ export function GameEvaluationCreator({
           <span className={currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
             Parámetros
           </span>
+          <span className={currentStep >= 4 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            Preguntas
+          </span>
         </div>
       </div>
 
@@ -776,6 +737,7 @@ export function GameEvaluationCreator({
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
+        {currentStep === 4 && renderStep4()}
       </div>
 
       {/* Navigation */}
@@ -791,7 +753,7 @@ export function GameEvaluationCreator({
         </Button>
 
         <div className="flex gap-3">
-          {currentStep < 3 ? (
+          {currentStep < 4 ? (
             <Button
               onClick={handleNext}
               className="flex items-center gap-2"

@@ -13,6 +13,7 @@ class TTSService {
     this.voices = [];
     this.currentUtterance = null;
     this.isClient = typeof window !== 'undefined';
+    this.currentVoice = null; // Add this line
     
     // Solo inicializar en el cliente
     if (this.isClient) {
@@ -42,6 +43,7 @@ class TTSService {
     
     if (spanishVoices.length > 0) {
       console.log('🇪🇸 Voces en español encontradas:', spanishVoices.map(v => v.name));
+      this.currentVoice = spanishVoices[0].name; // Update currentVoice
     }
   }
 
@@ -255,7 +257,10 @@ class TTSService {
       service: 'Web Speech API',
       cost: 'Gratuito',
       isClient: this.isClient,
+      isSupported: this.isClient && typeof speechSynthesis !== 'undefined',
       voicesAvailable: this.voices.length,
+      voicesCount: this.voices.length,
+      spanishVoices: this.voices.filter(v => v.lang.startsWith('es')).length,
       isEnabled: this.isEnabled,
       currentlyPlaying: this.currentUtterance !== null,
       supportedLanguages: this.voices.map(v => v.lang).filter((l, i, arr) => arr.indexOf(l) === i)

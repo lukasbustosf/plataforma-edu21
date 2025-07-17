@@ -24,6 +24,8 @@ import { NumberLineRace } from '@/components/game/NumberLineRace'
 import { FarmCountingGame } from '@/components/game/FarmCountingGame'
 import FarmCountingGameOA1 from '@/components/game/FarmCountingGameOA1'
 import FarmCountingGameOA1V2 from '@/components/game/FarmCountingGameOA1V2'
+import FarmCountingGameOA1Evaluar from '@/components/game/FarmCountingGameOA1Evaluar'
+import FarmCountingGameOA1Crear from '@/components/game/FarmCountingGameOA1Crear'
 import { WordBuilder } from '@/components/game/WordBuilder'
 import { WordSearch } from '@/components/game/WordSearch'
 import { HangmanVisual } from '@/components/game/HangmanVisual'
@@ -55,8 +57,20 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
   const [timeLeft, setTimeLeft] = useState(30)
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
+  const [answerHistory, setAnswerHistory] = useState<any[]>([])
 
   const gameId = params.id
+
+  const OA1_GAME_IDS = [
+    'oa1-mat-recordar',
+    'oa1-mat-comprender',
+    'oa1-mat-aplicar',
+    'oa1-mat-analyze',
+    'oa1-mat-evaluar',
+    'oa1-mat-crear'
+  ];
+
+  const isOA1Game = OA1_GAME_IDS.includes(gameId);
 
   // Fetch game session and questions
   useEffect(() => {
@@ -193,6 +207,15 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
     const currentQ = questions[currentQuestion]
     const isCorrect = currentQ.correct_answer === currentQ.options_json[optionIndex]
     
+    // Store answer history
+    setAnswerHistory(prev => [...prev, {
+      question: currentQ.stem_md,
+      userAnswer: currentQ.options_json[optionIndex],
+      correctAnswer: currentQ.correct_answer,
+      isCorrect: isCorrect,
+      skill: currentQ.skill || 'general'
+    }]);
+
     if (isCorrect) {
       const points = Math.max(50, 100 - (30 - timeLeft) * 2) // More points for faster answers
       setScore(score + points)
@@ -207,17 +230,29 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
   }
 
   if (loading || !gameSession || questions.length === 0) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-96">
+    if (isOA1Game) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-medium text-gray-900 mb-2">Cargando juego...</h2>
+            <h2 className="text-xl font-medium text-gray-900 mb-2">Cargando juego OA1...</h2>
             <p className="text-gray-600">Preparando la experiencia de juego</p>
           </div>
         </div>
-      </DashboardLayout>
-    )
+      );
+    } else {
+      return (
+        <DashboardLayout>
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+              <h2 className="text-xl font-medium text-gray-900 mb-2">Cargando juego...</h2>
+              <p className="text-gray-600">Preparando la experiencia de juego</p>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
   }
 
   const handleManualRefresh = async () => {
@@ -252,9 +287,9 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
 
   // Check if game is waiting to start
   if (gameSession.status === 'waiting') {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-96">
+    if (isOA1Game) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
           <div className="text-center max-w-md">
             {/* Waiting Animation */}
             <div className="relative mb-6">
@@ -267,10 +302,10 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
             
             {/* Status */}
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              ⏳ Esperando inicio del juego
+              ⏳ Esperando inicio del juego OA1
             </h2>
             <p className="text-gray-600 mb-4">
-              El profesor necesita iniciar el juego antes de que puedas participar
+              El juego OA1 está listo para comenzar.
             </p>
             
             {/* Game Info */}
@@ -303,12 +338,73 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
             </div>
           </div>
         </div>
-      </DashboardLayout>
-    )
+      );
+    } else {
+      return (
+        <DashboardLayout>
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center max-w-md">
+              {/* Waiting Animation */}
+              <div className="relative mb-6">
+                <div className="animate-pulse bg-blue-100 rounded-full h-20 w-20 mx-auto flex items-center justify-center">
+                  <svg className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v18m0-18l4 4m-4-4L8 7" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Status */}
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                ⏳ Esperando inicio del juego
+              </h2>
+              <p className="text-gray-600 mb-4">
+                El profesor necesita iniciar el juego antes de que puedas participar
+              </p>
+              
+              {/* Game Info */}
+              <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+                <h3 className="font-medium text-gray-900 mb-2">{gameSession.title}</h3>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p><strong>Engine:</strong> {gameSession.engine_id || gameSession.format}</p>
+                  <p><strong>Preguntas:</strong> {questions.length}</p>
+                  {gameSession.join_code && (
+                    <p><strong>Código:</strong> <span className="font-mono font-bold text-blue-600">{gameSession.join_code}</span></p>
+                  )}
+                </div>
+              </div>
+              
+              {/* Manual Refresh Button */}
+              <div className="mb-4">
+                <Button
+                  onClick={handleManualRefresh}
+                  variant="outline"
+                  className="w-full"
+                >
+                  🔄 Verificar estado del juego
+                </Button>
+              </div>
+              
+              {/* Auto-refresh */}
+              <div className="text-sm text-gray-500">
+                <p>Esta página se actualizará automáticamente cuando el juego comience</p>
+                <p className="mt-1">O puedes usar el botón de arriba para verificar manualmente</p>
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      );
+    }
   }
 
-  const handleGameEnd = () => {
-    router.push(`/student/games/${gameId}/results?score=${score}`)
+  const handleGameEnd = (finalScore?: number, history?: any[]) => {
+    const results = {
+      score: finalScore ?? score,
+      history: history ?? answerHistory,
+      gameTitle: gameSession?.title || 'Juego Completado',
+      gameId: gameId,
+    };
+    sessionStorage.setItem('lastGameResults', JSON.stringify(results));
+    router.push(`/student/games/${gameId}/results`);
   }
 
   const renderGameComponent = () => {
@@ -322,7 +418,7 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
       currentQuestion: questions[currentQuestion],
       timeRemaining: timeLeft,
       onAnswer: handleAnswer,
-      onGameEnd: handleGameEnd,
+      onGameEnd: () => handleGameEnd(),
       isPreview: false
     }
 
@@ -330,9 +426,9 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
     const commonCallbacks = {
       onComplete: (result: any) => {
         console.log('Game completed:', result)
-        router.push(`/student/games/${gameId}/results?score=${result.score || result.winner?.score || score}`)
+        handleGameEnd(result.score || result.winner?.score || score, result.history);
       },
-      onExit: handleGameEnd,
+      onExit: () => handleGameEnd(),
       enableAudio: gameSession.settings_json?.tts_enabled || true
     }
 
@@ -381,7 +477,33 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
           grade1B
         });
         
-        if (isOA1V2Specialized) {
+        // 🚨 FIX: Prioritize specific game IDs before general theme checks
+        if (gameId === 'oa1-mat-evaluar') {
+          console.log('⚖️ Using FarmCountingGameOA1Evaluar - Specialized Component for MAT.1B.OA.01 (Evaluar)')
+          return <FarmCountingGameOA1Evaluar 
+            gameSession={gameSession} 
+            onGameEnd={handleGameEnd} 
+            difficultyLevel={gameSession.settings_json?.difficultyLevel || 'avanzado'}
+          />
+        } else if (gameId === 'oa1-mat-crear') {
+          console.log('💡 Using FarmCountingGameOA1Crear - Specialized Component for MAT.1B.OA.01 (Crear)')
+          return <FarmCountingGameOA1Crear gameSession={gameSession} onGameEnd={handleGameEnd} />
+        } else if (['oa1-mat-recordar', 'oa1-mat-comprender', 'oa1-mat-aplicar', 'oa1-mat-analyze'].includes(gameId)) {
+          console.log('🌾 Using FarmCountingGameOA1 - Specialized Component for MAT.1B.OA.01')
+          
+          // Adapter function to match the expected signature
+          const handleOA1Answer = (questionId: string, answer: any, timeSpent: number) => {
+            console.log(`🎯 OA1 Answer: questionId=${questionId}, answer=${answer}, timeSpent=${timeSpent}ms`);
+            // This function is now mostly for logging, as the component handles its own state.
+          };
+          
+          return <FarmCountingGameOA1 
+            gameSession={gameSession}
+            onAnswer={handleOA1Answer}
+            onGameComplete={(finalScore, history) => handleGameEnd(finalScore, history)}
+            difficultyLevel={gameSession.settings_json?.difficultyLevel || 'basico'}
+          />
+        } else if (isOA1V2Specialized) {
           console.log('🌟 Using FarmCountingGameOA1V2 - Specialized Component V2 for MAT.1B.OA.01')
           
           // Adapter function to match the expected signature
@@ -450,6 +572,7 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
             gameSession={gameSession}
             onAnswer={handleOA1Answer}
             onGameComplete={handleGameEnd}
+            difficultyLevel={gameSession.settings_json?.difficultyLevel || 'basico'}
           />
         } else {
           const isFarmTheme = titleContainsGranja || titleContainsFarm || farmThemeTrue || grade1B;
@@ -1015,55 +1138,63 @@ export default function StudentGamePlayPage({ params }: { params: { id: string }
     }
   }
 
-  return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
-        {/* 🎮 ENGINE INFO HEADER */}
-        {gameSession && (
-          <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <FireIcon className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">{gameSession.title}</h3>
-                  <p className="text-sm text-gray-600">
-                    Engine: <span className="font-medium">{gameSession.engine_id || gameSession.format}</span>
-                  </p>
-                  {gameSession.engine_id && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                        🎮 {gameSession.engine_id}
+  if (isOA1Game) {
+    return (
+      <div className="min-h-screen">
+        {renderGameComponent()}
+      </div>
+    );
+  } else {
+    return (
+      <DashboardLayout>
+        <div className="max-w-4xl mx-auto">
+          {/* 🎮 ENGINE INFO HEADER */}
+          {gameSession && (
+            <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <FireIcon className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{gameSession.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      Engine: <span className="font-medium">{gameSession.engine_id || gameSession.format}</span>
+                    </p>
+                    {gameSession.engine_id && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                          🎮 {gameSession.engine_id}
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {gameSession.engine_name}
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-500">
-                        {gameSession.engine_name}
-                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <ClockIcon className="w-4 h-4" />
+                    <span>Tiempo: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                    <TrophyIcon className="w-4 h-4" />
+                    <span>Puntos: {score}</span>
+                  </div>
+                  {gameSession.engine_id && gameSession.settings_json?.engine_config && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Engine activo: Configuración optimizada
                     </div>
                   )}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <ClockIcon className="w-4 h-4" />
-                  <span>Tiempo: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                  <TrophyIcon className="w-4 h-4" />
-                  <span>Puntos: {score}</span>
-                </div>
-                {gameSession.engine_id && gameSession.settings_json?.engine_config && (
-                  <div className="text-xs text-gray-500 mt-1">
-                    Engine activo: Configuración optimizada
-                  </div>
-                )}
-              </div>
             </div>
-          </div>
-        )}
-        
-        {renderGameComponent()}
-      </div>
-    </DashboardLayout>
-  )
+          )}
+          
+          {renderGameComponent()}
+        </div>
+      </DashboardLayout>
+    );
+  }
 } 

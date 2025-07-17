@@ -49,7 +49,10 @@ const TTSControls: React.FC<TTSControlsProps> = ({
   useEffect(() => {
     // Inicializar información TTS
     const info = ttsService.getInfo();
-    setTtsInfo(info);
+    setTtsInfo({
+      ...info,
+      currentVoice: ttsService.currentVoice || 'Sistema'
+    });
     
     // Configurar TTS con valores iniciales
     ttsService.rate = rate;

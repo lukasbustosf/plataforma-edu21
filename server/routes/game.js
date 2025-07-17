@@ -697,6 +697,67 @@ router.get('/:id', requireRole('TEACHER', 'ADMIN_ESCOLAR', 'STUDENT'), async (re
       
       // Si no es un game-demo estático, buscar en mockGameData
       console.log(`🔍 No es game-demo estático, buscando ${id} en mockGameData...`);
+
+      // 🚨 **SOLUCIÓN DEFINITIVA**: Añadir lógica para crear dinámicamente sesiones de OA1
+      if (id.startsWith('oa1-mat-')) {
+        console.log(`🌱 Creating dynamic demo session for OA1 game: ${id}`);
+        const bloomLevel = id.replace('oa1-mat-', '');
+        
+        const difficultyMap = {
+          'recordar': 'basico',
+          'comprender': 'basico',
+          'aplicar': 'intermedio',
+          'analyze': 'intermedio',
+          'evaluar': 'avanzado',
+          'crear': 'avanzado'
+        };
+        const difficultyLevel = difficultyMap[bloomLevel] || 'basico';
+
+        const session = {
+          session_id: id,
+          quiz_id: `oa1-mat-quiz-${bloomLevel}`,
+          school_id: req.school_id || '550e8400-e29b-41d4-a716-446655440001',
+          host_id: '550e8400-e29b-41d4-a716-446655440003',
+          join_code: `OA1${bloomLevel.substring(0, 3).toUpperCase()}`,
+          title: `OA1 Matemáticas - Nivel: ${bloomLevel.charAt(0).toUpperCase() + bloomLevel.slice(1)}`,
+          description: `Juego de conteo para el OA1 de 1º Básico, nivel de Bloom: ${bloomLevel}.`,
+          format: 'custom',
+          status: 'active',
+          engine_id: 'ENG01',
+          engine_name: 'Counter/Number Line',
+          settings_json: {
+            demo: true,
+            max_players: 1,
+            time_limit: 999,
+            theme: 'granja_oa1_v2',
+            version: '2.0',
+            specialized_component: `FarmCountingGameOA1${bloomLevel.charAt(0).toUpperCase() + bloomLevel.slice(1)}`,
+            difficultyLevel: difficultyLevel
+          },
+          created_at: new Date().toISOString(),
+          quizzes: {
+            quiz_id: `oa1-mat-quiz-${bloomLevel}`,
+            title: `Quiz para OA1 - ${bloomLevel}`,
+            questions: [
+              {
+                question_id: `q1-${id}`,
+                stem_md: `Actividad de ${bloomLevel} para el OA1.`,
+                type: 'info',
+                options_json: [],
+                correct_answer: '',
+              }
+            ]
+          },
+           hosts: {
+              user_id: '550e8400-e29b-41d4-a716-446655440003',
+              first_name: 'Profesor',
+              last_name: 'Demo'
+            },
+        };
+        console.log(`✅ RETURNING dynamic OA1 session for ${id} with difficulty: ${difficultyLevel}`);
+        return res.json({ session });
+      }
+      
       console.log(`🔍 DEBUG GET: mockGameData available: ${mockGameData ? 'YES' : 'NO'}`);
       console.log(`🔍 DEBUG GET: Total sessions in mockGameData: ${mockGameData?.gameSessions?.length || 'UNKNOWN'}`);
       

@@ -53,8 +53,10 @@ import {
   ArrowTrendingUpIcon,
   BellIcon,
   UserIcon,
-  PaintBrushIcon
+  PaintBrushIcon,
+  BeakerIcon
 } from '@heroicons/react/24/outline'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 interface NavigationItem {
   name: string
@@ -100,6 +102,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             children: [
               { name: 'Planes de Clase', href: '/teacher/lesson', icon: DocumentDuplicateIcon },
               { name: 'Materiales Didácticos', href: '/teacher/materials', icon: FolderIcon },
+              { name: 'Banco de Preguntas', href: '/teacher/question-bank', icon: BeakerIcon },
+              { name: 'Mis Evaluaciones', href: '/teacher/my-evaluations', icon: DocumentTextIcon },
             ]
           },
           {
@@ -109,6 +113,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               { name: 'Crear Quiz/Examen', href: '/teacher/quiz', icon: DocumentTextIcon },
               { name: 'Tareas y Proyectos', href: '/teacher/assignments', icon: DocumentArrowDownIcon },
               { name: 'Juegos Educativos', href: '/teacher/games', icon: PlayIcon },
+              { name: 'Catálogo de Juegos OA1', href: '/teacher/oa1-games', icon: TrophyIcon },
             ]
           },
           {
@@ -680,6 +685,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-x-2 sm:gap-x-4 lg:gap-x-6">
 
               
+              {/* Notification Bell */}
+              {user?.role === 'STUDENT' && (
+                <NotificationBell />
+              )}
+
               {/* Profile dropdown */}
               <div className="flex items-center">
                 <div className="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">

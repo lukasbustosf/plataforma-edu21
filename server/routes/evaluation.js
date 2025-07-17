@@ -162,11 +162,11 @@ router.post('/', authenticateToken, async (req, res) => {
         });
       }
       
-      const validEngines = ['ENG01', 'ENG02', 'ENG05', 'ENG06', 'ENG07', 'ENG09'];
+      const validGameTemplates = ['FarmCountingGameOA1Analyze', 'Oa1MatAplicarGame']; // Add more as they are created
       
-      if (!validEngines.includes(engine_id)) {
+      if (!validGameTemplates.includes(engine_id)) {
         return res.status(400).json({ 
-          error: `Invalid engine ID. Valid engines: ${validEngines.join(', ')}` 
+          error: `Invalid game template ID. Valid templates are: ${validGameTemplates.join(', ')}` 
         });
       }
       
@@ -769,10 +769,11 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       skin_theme = 'default',
       time_limit_minutes = 30,
       weight = 10,
-      attempt_limit = 1
+      attempt_limit = 1,
+      manual_question_ids = [] // ✅ NEW: Accept manual question IDs
     } = req.body;
 
-    // Validate permissions - support both uppercase and lowercase roles
+    // Validate permissions
     const userRole = user.role?.toLowerCase();
     if (!['teacher', 'admin_escolar'].includes(userRole)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
@@ -785,44 +786,113 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       });
     }
 
-    if (oa_codes.length === 0) {
+    // If no manual questions are provided, OA codes are required for AI generation
+    if (manual_question_ids.length === 0 && oa_codes.length === 0) {
       return res.status(400).json({ 
-        error: 'At least one learning objective (OA) is required' 
+        error: 'At least one learning objective (OA) or one manual question is required.' 
       });
     }
 
-    // ENGINE IS THE FORMAT - No need for compatibility check
-    // The engine_id defines the game experience directly
-
     console.log(`🎮 Creating gamified evaluation: ${game_format} + ${engine_id} + ${skin_theme}`);
+    console.log(` MANUAL QUESTIONS: ${manual_question_ids.length}`);
+    console.log(` AI-TARGETED OAs: ${oa_codes.join(', ')}`);
 
-    // Generate AI content specific to game format
-    console.log(`🚀 ABOUT TO CALL aiService.generateGameContent`);
-    const aiService = require('../services/aiService');
-    
-    console.log(`🔍 BEFORE AI GENERATION - Title: "${title}"`);
-    console.log(`🔍 BEFORE AI GENERATION - Engine: ${engine_id}, Skin: ${skin_theme}`);
-    
-    const gameContent = await aiService.generateGameContent({
-      gameFormat: game_format,
-      engineId: engine_id,
-      title: title,                    // ✅ Pasar título para contexto educativo
-      description: description,        // ✅ Pasar descripción adicional
-      oaCodes: oa_codes,
-      difficulty: difficulty,
-      questionCount: question_count,
-      skinTheme: skin_theme,
-      schoolId: user.school_id,
-      userId: user.user_id
-    });
-    
-    console.log(`🔍 AFTER AI GENERATION - Questions generated: ${gameContent.questions?.length}`);
-    if (gameContent.questions?.length > 0) {
-      console.log(`🔍 FIRST QUESTION - Text: "${gameContent.questions[0].text}"`);
-      console.log(`🔍 FIRST QUESTION - Answer: ${gameContent.questions[0].correct_answer}`);
+    let finalQuestions = [];
+    let processingTime = 'N/A';
+
+    // --- 1. Fetch Manual Questions ---
+    if (manual_question_ids.length > 0) {
+      console.log(`🔍 Fetching ${manual_question_ids.length} manual questions from question_bank...`);
+      const { data: manualQuestions, error: manualError } = await supabase
+        .from('question_bank')
+        .select('*')
+        .in('question_id', manual_question_ids);
+
+      if (manualError) {
+        console.error('❌ Error fetching manual questions:', manualError);
+        return res.status(500).json({ error: 'Failed to fetch manual questions', details: manualError.message });
+      }
+
+      // ✅ Adapt fetched questions to the format expected by the game engine
+      finalQuestions = manualQuestions.map(q => ({
+        id: q.question_id,
+        text: q.question_text,
+        options: q.options_json,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation_text,
+        points: q.points || 10, // Default points
+        type: q.question_type,
+        bloom_level: q.bloom_level,
+        source: 'manual'
+      }));
+      console.log(`✅ Successfully fetched ${finalQuestions.length} manual questions.`);
     }
 
-    // Create evaluation record
+    // --- 2. Generate AI Questions (if needed) ---
+    const remainingQuestionsCount = question_count - finalQuestions.length;
+    if (remainingQuestionsCount > 0 && oa_codes.length > 0) {
+      console.log(`🤖 Need to generate ${remainingQuestionsCount} additional questions with AI...`);
+      const aiService = require('../services/aiService');
+      
+      const gameContent = await aiService.generateGameContent({
+        gameFormat: game_format,
+        engineId: engine_id,
+        title: title,
+        description: description,
+        oaCodes: oa_codes,
+        difficulty: difficulty,
+        questionCount: remainingQuestionsCount, // Generate only the remainder
+        skinTheme: skin_theme,
+        schoolId: user.school_id,
+        userId: user.user_id
+      });
+
+      processingTime = gameContent.processingTime || 'N/A';
+      const aiQuestions = gameContent.questions || [];
+
+      // --- Save AI-generated questions to question_bank ---
+      if (aiQuestions.length > 0) {
+        console.log(`💾 Saving ${aiQuestions.length} AI-generated questions to question_bank...`);
+        const questionsToInsert = aiQuestions.map(q => ({
+          question_text: q.text || q.question,
+          question_type: q.type || 'multiple_choice', // Default type
+          options_json: q.options || [],
+          correct_answer: q.correct_answer || q.correctAnswer,
+          explanation_text: q.explanation || '',
+          oa_id: q.oa_id || oa_codes[0] || 'N/A', // Use AI-provided OA or first requested OA
+          skill_tags: q.skill_tags || [],
+          bloom_level: q.bloom_level || 'Aplicar', // Use AI-provided Bloom or default
+          difficulty_score: mapDifficultyToScore(q.difficulty || difficulty),
+          is_validated: false, // AI-generated questions need manual validation
+          is_ai_generated: true,
+          author_id: user.user_id // Teacher who generated them
+        }));
+
+        const { data: insertedQuestions, error: insertError } = await supabase
+          .from('question_bank')
+          .insert(questionsToInsert)
+          .select('question_id'); // Select only the IDs of inserted questions
+
+        if (insertError) {
+          console.error('❌ Error saving AI-generated questions to question_bank:', insertError);
+          // Continue without saving to DB, but log the error
+        } else {
+          console.log(`✅ Successfully saved ${insertedQuestions.length} AI-generated questions to question_bank.`);
+          // Update aiQuestions with the new question_ids from the database
+          aiQuestions.forEach((q, index) => {
+            if (insertedQuestions[index]) {
+              q.id = insertedQuestions[index].question_id; // Assign the new UUID
+            }
+            q.source = 'ai'; // Mark AI questions
+          });
+        }
+      }
+
+      finalQuestions = [...finalQuestions, ...aiQuestions];
+      console.log(`✅ AI generated ${aiQuestions.length} questions. Total questions now: ${finalQuestions.length}`);
+    }
+
+    // --- 3. Create Evaluation Record ---
     const evaluationData = {
       evaluation_id: 'eval_gamified_' + Date.now(),
       school_id: user.school_id,
@@ -831,9 +901,9 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       title: title,
       description: description || `Evaluación gamificada: ${game_format} con ${engine_id}`,
       type: 'gamified',
-      mode: 'ai',
+      mode: manual_question_ids.length > 0 ? (oa_codes.length > 0 ? 'hybrid' : 'manual') : 'ai',
       weight: weight,
-      total_points: question_count * 10,
+      total_points: finalQuestions.length * 10, // Based on final question count
       attempt_limit: attempt_limit,
       time_limit_minutes: time_limit_minutes,
       game_format: game_format,
@@ -841,19 +911,20 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       skin_theme: skin_theme,
       engine_config: {
         difficulty: difficulty,
-        questionCount: question_count,
+        requestedQuestionCount: question_count,
+        actualQuestionCount: finalQuestions.length,
         skinTheme: skin_theme,
         oaCodes: oa_codes,
+        manualQuestionIds: manual_question_ids, // For traceability
         generatedAt: new Date().toISOString(),
-        aiGeneratedContent: true
+        aiGeneratedContent: remainingQuestionsCount > 0
       },
       status: 'draft',
       created_at: new Date().toISOString()
     };
 
-    // Save evaluation to database
+    // --- 4. Persist Evaluation to DB (optional, for now) ---
     console.log(`💾 Saving evaluation ${evaluationData.evaluation_id} to database`);
-    
     // 🚨 FIX: Check if Supabase is available before using it
     if (supabase && supabase.from) {
       const { data: savedEvaluation, error: saveError } = await supabase
@@ -893,10 +964,10 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       console.log(`✅ Evaluation ${evaluationData.evaluation_id} created in mock mode`);
     }
 
-    console.log(`✅ Generated ${gameContent.questions?.length || 0} questions for ${game_format}`);
+    console.log(`✅ Generated ${finalQuestions.length || 0} questions for ${game_format}`);
 
     // 🎨 APPLY DYNAMIC CONTENT TRANSFORMATION based on skin
-    let transformedQuestions = gameContent.questions || [];
+    let transformedQuestions = [...finalQuestions]; // Use the combined list
     console.log(`🔄 TRANSFORMATION CHECK: skin_theme="${skin_theme}", questions.length=${transformedQuestions.length}`);
     
     if (skin_theme && skin_theme !== 'default' && transformedQuestions.length > 0) {
@@ -933,13 +1004,13 @@ router.post('/gamified', authenticateToken, async (req, res) => {
                 question_id: q.id || `q${index}`,
                 question_order: index + 1,
                 stem_md: q.text || q.question,
-                type: 'multiple_choice',
+                type: q.type || 'multiple_choice',
                 options_json: q.options || [],
                 correct_answer: q.correct_answer || q.correctAnswer,
                 explanation: q.explanation || '',
                 points: q.points || 10,
-                difficulty: difficulty,
-                bloom_level: 'Aplicar'
+                difficulty: q.difficulty || difficulty,
+                bloom_level: q.bloom_level || 'Aplicar'
               }))
             }
           };
@@ -979,37 +1050,30 @@ router.post('/gamified', authenticateToken, async (req, res) => {
       }
     }
 
-    // Store complete evaluation data with questions in temporary storage
+    // --- 6. Store Complete Evaluation in Memory ---
     const completeEvaluationData = {
       ...evaluationData,
       questions: transformedQuestions,
       id: evaluationData.evaluation_id,
       eval_id: evaluationData.evaluation_id,
-      question_count: transformedQuestions.length || question_count,
-      total_points: (transformedQuestions.length || question_count) * 10
+      question_count: transformedQuestions.length,
+      total_points: transformedQuestions.length * 10
     };
     
-    console.log(`💾 STORING EVALUATION DATA:`, {
-      id: completeEvaluationData.evaluation_id,
-      title: completeEvaluationData.title,
-      questionCount: completeEvaluationData.questions?.length,
-      firstQuestion: completeEvaluationData.questions?.[0]?.text,
-      lastQuestion: completeEvaluationData.questions?.[completeEvaluationData.questions.length - 1]?.text
-    });
-    
     gamifiedEvaluationsStore.set(evaluationData.evaluation_id, completeEvaluationData);
-    console.log(`✅ SUCCESSFULLY stored evaluation ${evaluationData.evaluation_id} in temporary storage with ${gameContent.questions?.length || 0} questions`);
+    console.log(`✅ SUCCESSFULLY stored evaluation ${evaluationData.evaluation_id} with ${transformedQuestions.length} questions`);
 
+    // --- 7. Send Response ---
     res.status(201).json({
       success: true,
       evaluation: evaluationData,
-      gameContent: gameContent,
-      message: `Gamified evaluation created successfully with ${gameContent.questions?.length || 0} questions`,
+      message: `Gamified evaluation created successfully with ${finalQuestions.length} questions`,
       metadata: {
-        aiGenerated: true,
-        processingTime: gameContent.processingTime || 'N/A',
+        aiGenerated: remainingQuestionsCount > 0,
+        manualQuestions: manual_question_ids.length,
+        totalQuestions: finalQuestions.length,
+        processingTime: processingTime,
         engineUsed: engine_id,
-        formatUsed: game_format,
         skinApplied: skin_theme
       }
     });
@@ -1101,6 +1165,7 @@ router.post('/gamified/:id/start-game', authenticateToken, async (req, res) => {
       quiz_id: `quiz_${evaluationData.evaluation_id}`, // Create virtual quiz ID
       school_id: evaluationData.school_id,
       host_id: evaluationData.teacher_id,
+      class_id: evaluationData.class_id, // Ensure class_id is passed
       join_code: joinCode,
       title: evaluationData.title,
       description: evaluationData.description || `Juego basado en evaluación: ${evaluationData.title}`,
@@ -1130,13 +1195,13 @@ router.post('/gamified/:id/start-game', authenticateToken, async (req, res) => {
           question_id: q.id || `q_${index}`,
           question_order: index + 1,
           stem_md: q.text || q.question,
-          type: 'multiple_choice',
+          type: q.type || 'multiple_choice',
           options_json: q.options || [],
           correct_answer: q.correct_answer || q.correctAnswer,
           explanation: q.explanation || `Respuesta correcta: ${q.correct_answer || q.correctAnswer}`,
           points: q.points || 10,
-          difficulty: evaluationData.engine_config?.difficulty || 'medium',
-          bloom_level: 'Aplicar',
+          difficulty: q.difficulty || evaluationData.engine_config?.difficulty || 'medium',
+          bloom_level: q.bloom_level || 'Aplicar',
           tts_url: null
         })) : []
       },
@@ -1293,6 +1358,16 @@ function getEngineName(engineId) {
   return engineNames[engineId] || `Engine ${engineId}`;
 }
 
+// Helper function to map difficulty string to numeric score (1-5)
+function mapDifficultyToScore(difficultyString) {
+  switch (difficultyString.toLowerCase()) {
+    case 'easy': return 1;
+    case 'medium': return 3;
+    case 'hard': return 5;
+    default: return 3; // Default to medium
+  }
+}
+
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -1361,3 +1436,184 @@ function generateCSVReport(report) {
 }
 
 module.exports = router; 
+
+/**
+ * POST /evaluation/submit-attempt
+ * Submit a student's attempt for a gamified evaluation.
+ */
+router.post('/submit-attempt', authenticateToken, requireRole(['student']), async (req, res) => {
+  try {
+    const { user } = req;
+    const { sessionId, score, results } = req.body;
+
+    // 1. Verify the game session exists and belongs to the student's class
+    const { data: gameSession, error: sessionError } = await supabase
+      .from('game_sessions')
+      .select('*, evaluations(*)')
+      .eq('session_id', sessionId)
+      .single();
+
+    if (sessionError || !gameSession) {
+      return res.status(404).json({ error: 'Game session not found.' });
+    }
+
+    // Basic class verification (can be more robust)
+    const { data: studentClass, error: classError } = await supabase
+      .from('student_classes')
+      .select('class_id')
+      .eq('student_id', user.user_id)
+      .eq('class_id', gameSession.class_id)
+      .single();
+
+    if (classError || !studentClass) {
+      return res.status(403).json({ error: 'No tienes permiso para enviar esta evaluación.' });
+    }
+
+    // 2. Check if student has already submitted for this session (optional, based on attempt_limit)
+    // For now, we'll allow multiple submissions for simplicity, but in a real scenario,
+    // you'd check evaluation_attempts table for existing attempts and the evaluation.attempt_limit.
+
+    // 3. Save the attempt details
+    const { data: attempt, error: attemptError } = await supabase
+      .from('evaluation_attempts') // Assuming this table exists or will be created
+      .insert({
+        eval_id: gameSession.evaluation_id,
+        student_id: user.user_id,
+        session_id: sessionId,
+        score_raw: score,
+        // You might want to store more details from 'results' here, e.g., correct/incorrect count
+        // For now, we'll just store the raw score.
+        submitted_at: new Date().toISOString(),
+        status: 'completed',
+      })
+      .select()
+      .single();
+
+    if (attemptError) {
+      console.error('Error saving attempt:', attemptError);
+      return res.status(500).json({ error: 'Error al guardar el intento de evaluación.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Evaluación enviada exitosamente.',
+      attemptId: attempt.attempt_id,
+    });
+
+  } catch (error) {
+    console.error('Error in submit-attempt endpoint:', error);
+    res.status(500).json({ error: 'Error interno del servidor al procesar la evaluación.' });
+  }
+}); 
+
+/**
+ * GET /evaluation/student/:sessionId/play
+ * Get all necessary data for a student to play a game session.
+ */
+router.get('/student/:sessionId/play', authenticateToken, requireRole(['student']), async (req, res) => {
+  try {
+    const { user } = req;
+    const { sessionId } = req.params;
+
+    // Similar verification as the details endpoint, can be refactored into a middleware
+    const { data: gameSession, error: sessionError } = await supabase
+      .from('game_sessions')
+      .select('*, evaluations(*)')
+      .eq('session_id', sessionId)
+      .single();
+
+    if (sessionError || !gameSession) {
+      return res.status(404).json({ error: 'Game session not found.' });
+    }
+
+    // This is a simplified check. In a real scenario, you would have a proper mapping
+    // of students to classes to verify enrollment.
+    if (gameSession.class_id && user.class_id !== gameSession.class_id) {
+        return res.status(403).json({ error: 'You are not authorized to play this game session.' });
+    }
+
+    // Fetch questions for the evaluation
+    const { data: questions, error: questionsError } = await supabase
+      .from('evaluation_questions')
+      .select('*, questions(*)')
+      .eq('evaluation_id', gameSession.evaluation_id);
+
+    if (questionsError) {
+      return res.status(500).json({ error: 'Failed to fetch questions for the evaluation.' });
+    }
+
+    res.json({
+      success: true,
+      gameData: {
+        game_template_id: gameSession.evaluations.engine_id, // Using engine_id as the template id
+        questions: questions.map(q => q.questions),
+        settings: gameSession.evaluations.engine_config,
+      },
+    });
+
+  } catch (error) {
+    console.error('Error fetching game session for play:', error);
+    res.status(500).json({ error: 'Failed to fetch game session data.' });
+  }
+}); 
+
+/**
+ * GET /evaluation/student/:sessionId/details
+ * Get evaluation details for a student to display on the lobby/ante-sala page.
+ */
+router.get('/student/:sessionId/details', authenticateToken, requireRole(['student']), async (req, res) => {
+  try {
+    const { user } = req;
+    const { sessionId } = req.params;
+
+    // 1. Find the game session
+    const { data: gameSession, error: sessionError } = await supabase
+      .from('game_sessions')
+      .select(`
+        *,
+        evaluations(*),
+        users:host_id(first_name, last_name)
+      `)
+      .eq('session_id', sessionId)
+      .single();
+
+    if (sessionError || !gameSession) {
+      return res.status(404).json({ error: 'La sesión de evaluación no fue encontrada.' });
+    }
+
+    // 2. Verify student is in the class for which the session was created
+    const { data: studentClass, error: classError } = await supabase
+      .from('student_classes')
+      .select('class_id')
+      .eq('student_id', user.user_id)
+      .eq('class_id', gameSession.class_id)
+      .single();
+
+    if (classError || !studentClass) {
+      return res.status(403).json({ error: 'No tienes permiso para acceder a esta evaluación.' });
+    }
+
+    // 3. Check if the student has already completed this evaluation
+    // This logic will be implemented later when we have the attempts table
+
+    // 4. Check if the due date has passed
+    if (new Date(gameSession.due_date) < new Date()) {
+        return res.status(403).json({ error: 'La fecha límite para esta evaluación ya ha pasado.' });
+    }
+
+    // 5. Return the necessary details
+    res.json({
+      success: true,
+      details: {
+        title: gameSession.evaluations.title,
+        teacherName: `${gameSession.users.first_name} ${gameSession.users.last_name}`,
+        questionCount: gameSession.evaluations.question_count || 10, // Fallback
+        dueDate: gameSession.due_date,
+      },
+    });
+
+  } catch (error) {
+    console.error('Error fetching evaluation details for student:', error);
+    res.status(500).json({ error: 'Error interno del servidor al obtener los detalles de la evaluación.' });
+  }
+});

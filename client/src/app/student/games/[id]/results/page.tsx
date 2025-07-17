@@ -1,279 +1,208 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from '@/store/auth'
-import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
-import { 
-  TrophyIcon, 
-  ChartBarIcon, 
-  PlayIcon,
-  HomeIcon,
-  StarIcon
-} from '@heroicons/react/24/outline'
-import toast from 'react-hot-toast'
+import { useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { CheckCircleIcon, XCircleIcon, LightBulbIcon, ArrowPathIcon, ArrowRightIcon, DocumentArrowDownIcon } from '@heroicons/react/24/solid';
+import Confetti from 'react-confetti';
+import { useAuth } from '@/store/auth';
 
-export default function StudentGameResultsPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { user, fullName } = useAuth()
-  const [gameSession, setGameSession] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+// Import new visual components
+import { MasteryGauge } from '@/components/game/MasteryGauge';
+import { BloomRadarChart } from '@/components/game/BloomRadarChart';
+import { AchievementCertificate } from '@/components/game/AchievementCertificate';
+import { ResultsPDFDocument } from '@/components/game/ResultsPDFDocument';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 
-  const gameId = params.id
-  const finalScore = parseInt(searchParams.get('score') || '0')
 
-  // Fetch game session data
+interface GameResult {
+  score: number;
+  history: {
+    question: string;
+    userAnswer: string;
+    correctAnswer: string;
+    isCorrect: boolean;
+    skill: string;
+  }[];
+  gameTitle: string;
+  gameId: string;
+}
+
+export default function GameResultsPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [results, setResults] = useState<GameResult | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
   useEffect(() => {
-    const fetchGameData = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/game/${gameId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setGameSession(data.session)
-        } else {
-          toast.error('No se pudo cargar los resultados del juego')
-        }
-      } catch (error) {
-        console.error('Error fetching game results:', error)
-        toast.error('Error al cargar los resultados')
-      } finally {
-        setLoading(false)
+    setIsClient(true);
+    const resultsData = sessionStorage.getItem('lastGameResults');
+    if (resultsData) {
+      const parsedResults = JSON.parse(resultsData);
+      // Ensure history is an array before setting results
+      if (parsedResults && !Array.isArray(parsedResults.history)) {
+        parsedResults.history = []; // Default to empty array if not an array
       }
+      setResults(parsedResults);
+      const accuracy = (parsedResults.history && Array.isArray(parsedResults.history)) ? parsedResults.history.filter((h: any) => h.isCorrect).length / parsedResults.history.length : 0;
+      if (accuracy >= 0.8) {
+        setShowConfetti(true);
+      }
+    } else {
+      // router.push('/student/dashboard');
     }
+  }, [router]);
 
-    fetchGameData()
-  }, [gameId])
-
-  if (loading) {
+  if (!results) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-medium text-gray-900 mb-2">Cargando resultados...</h2>
-            <p className="text-gray-600">Calculando tu puntuación final</p>
-          </div>
+        <div className="text-center p-8">
+          <h1 className="text-2xl font-bold">Cargando resultados...</h1>
+          <p className="mt-2">Si no hay resultados, por favor vuelve al catálogo de juegos.</p>
+          <Button onClick={() => router.push('/teacher/oa1-games')} className="mt-4">Volver al Catálogo</Button>
         </div>
       </DashboardLayout>
-    )
+    );
   }
 
-  // Calculate results based on game data
-  const totalQuestions = gameSession?.quizzes?.questions?.length || 0
-  const playerAccuracy = totalQuestions > 0 ? Math.round((finalScore / (totalQuestions * 100)) * 100) : 0
-  const questionsCorrect = Math.round((playerAccuracy / 100) * totalQuestions)
-  
-  // Mock some additional data for demo purposes
-  const results = {
-    playerScore: finalScore,
-    playerAccuracy: Math.min(playerAccuracy, 100),
-    playerPosition: finalScore >= 800 ? 1 : finalScore >= 600 ? 2 : finalScore >= 400 ? 3 : 4,
-    totalPlayers: 5, // Mock total players
-    gameTitle: gameSession?.title || 'Juego Demo',
-    questionsCorrect,
-    totalQuestions,
-    timeSpent: '3:45', // Mock time
-    achievements: finalScore >= 800 ? [
-      { name: 'Excelencia', description: 'Obtuviste más de 800 puntos', earned: true },
-      { name: 'Respuesta Rápida', description: 'Respondiste con velocidad', earned: true }
-    ] : finalScore >= 500 ? [
-      { name: 'Buen Trabajo', description: 'Obtuviste más de 500 puntos', earned: true }
-    ] : [],
-    leaderboard: [
-      { position: 1, name: finalScore >= 800 ? (fullName || 'Tú') : 'Ana García', score: finalScore >= 800 ? finalScore : 950, accuracy: finalScore >= 800 ? Math.min(playerAccuracy, 100) : 95, isCurrentUser: finalScore >= 800 },
-      { position: 2, name: finalScore >= 600 && finalScore < 800 ? (fullName || 'Tú') : 'Carlos López', score: finalScore >= 600 && finalScore < 800 ? finalScore : 920, accuracy: finalScore >= 600 && finalScore < 800 ? Math.min(playerAccuracy, 100) : 92, isCurrentUser: finalScore >= 600 && finalScore < 800 },
-      { position: 3, name: finalScore >= 400 && finalScore < 600 ? (fullName || 'Tú') : 'María Torres', score: finalScore >= 400 && finalScore < 600 ? finalScore : 850, accuracy: finalScore >= 400 && finalScore < 600 ? Math.min(playerAccuracy, 100) : 85, isCurrentUser: finalScore >= 400 && finalScore < 600 },
-      { position: 4, name: finalScore < 400 ? (fullName || 'Tú') : 'Pedro Ruiz', score: finalScore < 400 ? finalScore : 780, accuracy: finalScore < 400 ? Math.min(playerAccuracy, 100) : 78, isCurrentUser: finalScore < 400 },
-      { position: 5, name: 'Luis Morales', score: 720, accuracy: 72, isCurrentUser: false }
-    ]
-  }
+  const correctAnswers = results.history.filter(h => h.isCorrect).length;
+  const totalQuestions = results.history.length;
+  const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
-  const getPositionColor = (position: number) => {
-    if (position === 1) return 'text-yellow-600'
-    if (position === 2) return 'text-gray-500'
-    if (position === 3) return 'text-amber-600'
-    return 'text-gray-600'
-  }
+  const incorrectAnswers = results.history.filter(h => !h.isCorrect);
 
-  const getPositionIcon = (position: number) => {
-    if (position <= 3) return <TrophyIcon className="h-5 w-5" />
-    return <span className="text-sm font-bold">#{position}</span>
-  }
+  const skillsData = Object.entries(results.history.reduce((acc, h) => {
+    const skill = h.skill || 'General';
+    if (!acc[skill]) {
+      acc[skill] = { correct: 0, total: 0 };
+    }
+    acc[skill].total++;
+    if (h.isCorrect) acc[skill].correct++;
+    return acc;
+  }, {} as Record<string, { correct: number, total: number }>))
+  .map(([skill, data]) => ({
+    skill,
+    accuracy: Math.round((data.correct / data.total) * 100),
+  }));
+
+  const dominatedSkills = skillsData.filter(s => s.accuracy === 100).map(s => s.skill);
+  const practiceSkills = skillsData.filter(s => s.accuracy < 100).map(s => s.skill);
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Results Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-8 text-white text-center">
-          <div className="mb-4">
-            {results.playerPosition <= 3 ? (
-              <TrophyIcon className="h-16 w-16 mx-auto text-yellow-300" />
-            ) : (
-              <StarIcon className="h-16 w-16 mx-auto text-white" />
+      {showConfetti && isClient && <Confetti recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
+      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+        
+        <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800">{results.gameTitle}</h1>
+            <p className="text-xl text-gray-600 mt-2">¡Aquí tienes tu informe de maestría!</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Columna Izquierda: Gráficos y Certificado */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card>
+              <CardHeader><CardTitle>Medidor de Dominio</CardTitle></CardHeader>
+              <CardContent>
+                <MasteryGauge accuracy={accuracy} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Radar de Habilidades</CardTitle></CardHeader>
+              <CardContent>
+                <BloomRadarChart skillsData={skillsData} />
+              </CardContent>
+            </Card>
+             <AchievementCertificate 
+                studentName={user?.first_name || 'Estudiante'}
+                gameTitle={results.gameTitle}
+                score={results.score}
+                accuracy={accuracy}
+              />
+          </div>
+
+          {/* Columna Derecha: Repaso y Próximos Pasos */}
+          <div className="lg:col-span-2 space-y-6">
+            {incorrectAnswers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-2xl font-bold text-gray-800">
+                    <ArrowPathIcon className="h-7 w-7 mr-3 text-orange-500" />
+                    Zona de Repaso Inteligente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-4">
+                    {incorrectAnswers.map((item, index) => (
+                      <li key={index} className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                        <p className="font-semibold text-gray-700">{item.question}</p>
+                        <div className="mt-2 flex items-center">
+                          <XCircleIcon className="h-6 w-6 mr-2 text-red-500" />
+                          <p className="text-red-700">Tu respuesta: {item.userAnswer}</p>
+                        </div>
+                        <div className="mt-1 flex items-center">
+                          <CheckCircleIcon className="h-6 w-6 mr-2 text-green-500" />
+                          <p className="text-green-700">Respuesta correcta: {item.correctAnswer}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             )}
-          </div>
-          <h1 className="text-3xl font-bold mb-2">
-            {results.playerPosition === 1 ? '¡Felicitaciones! 🎉' :
-             results.playerPosition <= 3 ? '¡Excelente trabajo! 👏' :
-             '¡Buen intento! 💪'}
-          </h1>
-          <p className="text-xl opacity-90">
-            Terminaste en el puesto {results.playerPosition} de {results.totalPlayers}
-          </p>
-          <p className="opacity-75">{results.gameTitle}</p>
-        </div>
 
-        {/* Performance Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{results.playerScore}</div>
-            <div className="text-sm text-gray-600">Puntuación Final</div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-2xl font-bold text-gray-800">
+                  <ArrowRightIcon className="h-7 w-7 mr-3 text-blue-500" />
+                  ¿Cuál es tu Próximo Paso?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                {isClient && (
+                  <>
+                    {/*
+                    // Deshabilitado temporalmente debido a problemas de tipado con @react-pdf/renderer
+                    <PDFDownloadLink
+                      document={<ResultsPDFDocument results={results} studentName={user?.first_name || 'Estudiante'} />}
+                      fileName={`informe-${results.gameId}-${new Date().toISOString().split('T')[0]}.pdf`}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none bg-gray-200 text-gray-900 hover:bg-gray-300 h-10 px-4 py-2"
+                    >
+                      {({ loading }: any) => (
+                        <>
+                          <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+                          {loading ? 'Generando PDF...' : 'Descargar Informe'}
+                        </>
+                      )}
+                    </PDFDownloadLink>
+                    */}
+                    <Button variant="secondary" disabled={true}>
+                      <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+                      Descargar Informe (Función Deshabilitada)
+                    </Button>
+                  </>
+                )}
+                {practiceSkills.length > 0 ? (
+                  <Button onClick={() => router.push(`/student/games/${results.gameId}/play`)}>
+                    <ArrowPathIcon className="h-5 w-5 mr-2" />
+                    Volver a Intentar
+                  </Button>
+                ) : (
+                  <Button onClick={() => router.push('/teacher/oa1-games')}>
+                    ¡Buscar un Desafío Mayor!
+                  </Button>
+                )}
+                 <Button onClick={() => router.push('/teacher/oa1-games')} variant="outline">
+                    Ver Catálogo de Juegos
+                  </Button>
+              </CardContent>
+            </Card>
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{results.playerAccuracy}%</div>
-            <div className="text-sm text-gray-600">Precisión</div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
-              {results.questionsCorrect}/{results.totalQuestions}
-            </div>
-            <div className="text-sm text-gray-600">Respuestas Correctas</div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">{results.timeSpent}</div>
-            <div className="text-sm text-gray-600">Tiempo Total</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Leaderboard */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Tabla de Posiciones</h2>
-            </div>
-            <div className="p-6">
-              <div className="space-y-3">
-                {results.leaderboard.map((player) => (
-                  <div
-                    key={player.position}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      player.isCurrentUser 
-                        ? 'bg-purple-50 border-2 border-purple-200' 
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`flex items-center justify-center w-8 h-8 ${getPositionColor(player.position)}`}>
-                        {getPositionIcon(player.position)}
-                      </div>
-                      <div>
-                        <div className={`font-medium ${
-                          player.isCurrentUser ? 'text-purple-900' : 'text-gray-900'
-                        }`}>
-                          {player.name}
-                          {player.isCurrentUser && (
-                            <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-                              Tú
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600">{player.accuracy}% precisión</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-gray-900">{player.score}</div>
-                      <div className="text-sm text-gray-500">puntos</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Achievements */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Logros Obtenidos</h2>
-            </div>
-            <div className="p-6">
-              {results.achievements.length === 0 ? (
-                <div className="text-center py-8">
-                  <StarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No obtuviste logros en este juego</p>
-                  <p className="text-sm text-gray-500">¡Sigue practicando para desbloquear logros!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {results.achievements.map((achievement, index) => (
-                    <div key={index} className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="text-2xl">🏆</div>
-                        <div>
-                          <h3 className="font-medium text-yellow-800">{achievement.name}</h3>
-                          <p className="text-sm text-yellow-700 mt-1">{achievement.description}</p>
-                          <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            ✓ Conseguido
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={() => router.push('/student/games')}
-            variant="primary"
-            leftIcon={<PlayIcon className="h-4 w-4" />}
-          >
-            Jugar Otro Juego
-          </Button>
-          
-          <Button
-            onClick={() => router.push('/student/progress')}
-            variant="outline"
-            leftIcon={<ChartBarIcon className="h-4 w-4" />}
-          >
-            Ver Mi Progreso
-          </Button>
-          
-          <Button
-            onClick={() => router.push('/student/dashboard')}
-            variant="outline"
-            leftIcon={<HomeIcon className="h-4 w-4" />}
-          >
-            Ir al Dashboard
-          </Button>
-        </div>
-
-        {/* Motivational Message */}
-        <div className="bg-blue-50 rounded-lg p-6 text-center">
-          <h3 className="font-medium text-blue-900 mb-2">
-            {results.playerPosition === 1 ? '¡Eres el mejor de la clase!' :
-             results.playerPosition <= 3 ? '¡Estás entre los mejores!' :
-             results.playerAccuracy >= 80 ? '¡Excelente precisión!' :
-             '¡Sigue practicando, vas muy bien!'}
-          </h3>
-          <p className="text-blue-800 text-sm">
-            Cada juego es una oportunidad para aprender algo nuevo. ¡Sigue así!
-          </p>
         </div>
       </div>
     </DashboardLayout>
-  )
-} 
+  );
+}

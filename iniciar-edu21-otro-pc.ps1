@@ -6,7 +6,7 @@ Write-Host "🌟 Iniciando Plataforma EDU21..." -ForegroundColor Green
 # Verificar que estemos en el directorio correcto
 if (!(Test-Path "server") -or !(Test-Path "client")) {
     Write-Host "❌ Error: Ejecuta este script desde la carpeta raíz del proyecto" -ForegroundColor Red
-    Write-Host "📂 Asegúrate de estar en: plataforma-edu21\" -ForegroundColor Yellow
+    Write-Host "📂 Asegúrate de estar en: plataforma-edu21" -ForegroundColor Yellow
     exit 1
 }
 
@@ -53,4 +53,4 @@ Start-Sleep 3
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\client'; Write-Host '🌐 Cliente EDU21 - Puerto 3000' -ForegroundColor Blue; npm run dev"
 
 Write-Host "🎉 EDU21 iniciado correctamente!" -ForegroundColor Green
-Write-Host "⏳ Espera 30 segundos y ve a: http://localhost:3000" -ForegroundColor Yellow 
+Write-Host "⏳ Espera 30 segundos y ve a: http://localhost:3000" -ForegroundColor Yellow
