@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/store/auth'
 import { api } from '@/lib/api'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { 
   PlayIcon,

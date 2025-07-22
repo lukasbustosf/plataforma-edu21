@@ -117,6 +117,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             ]
           },
           {
+            name: 'Módulo Laboratorios',
+            icon: BeakerIcon,
+            children: [
+              { name: 'Catálogo de Actividades', href: '/teacher/labs/activities', icon: BookOpenIcon },
+              { name: 'Gestión de Material', href: '/teacher/labs/materials', icon: FolderIcon },
+              { name: 'Registro de Uso', href: '/teacher/labs/tracking', icon: ClipboardDocumentCheckIcon },
+              { name: 'Dashboard de Impacto', href: '/teacher/labs/dashboard', icon: ChartBarIcon },
+            ]
+          },
+          {
             name: 'Herramientas IA',
             icon: CpuChipIcon,
             children: [
@@ -411,6 +421,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               { name: 'Reportes de Uso', href: '/admin/usage-reports', icon: DocumentArrowDownIcon },
               { name: 'Compliance y Legal', href: '/admin/compliance', icon: DocumentCheckIcon },
               { name: 'Exportaciones Masivas', href: '/admin/bulk-exports', icon: DocumentDuplicateIcon },
+            ]
+          },
+          {
+            name: 'Módulo Laboratorios',
+            icon: BeakerIcon,
+            children: [
+              { name: 'Gestión de Material', href: '/admin/lab-management', icon: FolderIcon },
+              { name: 'Catálogo de Actividades', href: '/admin/lab/activities', icon: BookOpenIcon },
+              { name: 'Dashboard de Impacto', href: '/admin/lab/dashboard', icon: ChartBarIcon },
             ]
           },
           {

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Button } from '@/components/ui/Button'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { 
   PlayIcon, 

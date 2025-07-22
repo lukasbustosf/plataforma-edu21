@@ -102,7 +102,7 @@ export function ResponsiveTable({
   const renderLoadingSkeleton = () => (
     <>
       {/* Desktop loading */}
-      <div className="table-desktop">
+      <table className="table-desktop min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             {columns.map((column) => (
@@ -123,7 +123,7 @@ export function ResponsiveTable({
             </tr>
           ))}
         </tbody>
-      </div>
+      </table>
 
       {/* Mobile loading */}
       <div className="table-mobile-card">
@@ -151,7 +151,7 @@ export function ResponsiveTable({
   )
 
   const renderDesktopTable = () => (
-    <div className="table-desktop">
+    <table className="table-desktop min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
           {columns.map((column) => (
@@ -183,7 +183,7 @@ export function ResponsiveTable({
           </tr>
         ))}
       </tbody>
-    </div>
+    </table>
   )
 
   const renderMobileCards = () => (

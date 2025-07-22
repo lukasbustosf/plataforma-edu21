@@ -1,22 +1,11 @@
+require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const helmet = require('helmet');
-const dotenv = require('dotenv');
 const path = require('path');
-
-// Load environment variables
-const envPath = path.join(__dirname, '.env');
-console.log('Loading .env from:', envPath);
-console.log('File exists:', require('fs').existsSync(envPath));
-
-const result = dotenv.config({ path: envPath });
-if (result.error) {
-  console.log('Dotenv error:', result.error);
-} else {
-  console.log('Dotenv loaded successfully');
-}
 
 // Fallback environment variables for development
 if (!process.env.PORT) process.env.PORT = '5000';
@@ -42,6 +31,7 @@ const evaluationRoutes = require('./routes/evaluation');
 const oaRoutes = require('./routes/oa');
 const questionBankRoutes = require('./routes/questionBank');
 const notificationRoutes = require('./routes/notifications'); // New import
+const labRoutes = require('./routes/lab'); // Importar rutas de laboratorio
 const { authenticateToken } = require('./middleware/auth');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const logger = require('./utils/logger');
@@ -100,6 +90,7 @@ app.use('/api/evaluation', authenticateToken, evaluationRoutes);
 app.use('/api/oa', authenticateToken, oaRoutes);
 app.use('/api/question-bank', authenticateToken, questionBankRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes); // New route
+app.use('/api/lab', labRoutes); // Registrar rutas de laboratorio
 app.use('/api/demo', authenticateToken, require('./routes/demo'));
 app.use('/api/skins', require('./routes/skins'));
 app.use('/api/security', require('./routes/security'));

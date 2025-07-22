@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import FarmCountingGameOA1Analyze from '@/components/game/FarmCountingGameOA1Analyze'
 

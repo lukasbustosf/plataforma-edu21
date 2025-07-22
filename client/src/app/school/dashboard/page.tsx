@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { 
   UsersIcon, 

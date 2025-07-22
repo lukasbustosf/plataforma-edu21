@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BellIcon } from '@heroicons/react/24/outline';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 const NotificationBell: React.FC = () => {

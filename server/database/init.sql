@@ -151,6 +151,22 @@ CREATE TABLE IF NOT EXISTS unit_oa (
 -- CLASS & ENROLLMENT SYSTEM
 -- ===============================================
 
+-- Courses (e.g., "5th Grade Math", "High School Biology")
+CREATE TABLE IF NOT EXISTS courses (
+    course_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    school_id UUID NOT NULL REFERENCES schools(school_id) ON DELETE CASCADE,
+    subject_id UUID NOT NULL REFERENCES subjects(subject_id) ON DELETE CASCADE,
+    grade_code VARCHAR(10) REFERENCES grade_levels(grade_code),
+    course_name VARCHAR(255) NOT NULL,
+    course_code VARCHAR(50) UNIQUE,
+    description TEXT,
+    year INTEGER NOT NULL DEFAULT EXTRACT(YEAR FROM NOW()),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(school_id, subject_id, grade_code, year)
+);
+
 -- Classes (Enhanced)
 CREATE TABLE IF NOT EXISTS classes (
     class_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
