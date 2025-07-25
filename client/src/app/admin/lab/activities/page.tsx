@@ -7,119 +7,134 @@ import { PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal' // Importar el modal
 
 export default function AdminLabActivitiesPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Estados para el modal de eliminación
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activityToDelete, setActivityToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const fetchActivities = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/lab/activities')
+      if (!response.ok) throw new Error('Failed to fetch activities')
+      const result = await response.json()
+      if (result.success) {
+        setActivities(result.data)
+      } else {
+        throw new Error(result.message || 'An error occurred')
+      }
+    } catch (err: any) {
+      setError(err.message)
+      console.error('Error fetching lab activities:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchActivities = async () => {
-      setLoading(true)
-      console.log('[DEBUG] Iniciando fetch de actividades...');
-      try {
-        const response = await fetch('/api/lab/activities')
-        if (!response.ok) {
-          throw new Error('Failed to fetch activities')
-        }
-        const result = await response.json()
-        
-        // --- LOG DE DEPURACIÓN ---
-        console.log('[DEBUG] Datos recibidos de la API:', JSON.stringify(result, null, 2));
-
-        if (result.success && Array.isArray(result.data)) {
-          setActivities(result.data)
-          // --- LOG DE DEPURACIÓN ---
-          console.log('[DEBUG] Estado "activities" actualizado:', JSON.stringify(result.data, null, 2));
-        } else {
-          console.error('[DEBUG] La respuesta de la API no fue exitosa o los datos no son un array:', result);
-          throw new Error(result.message || 'An error occurred')
-        }
-      } catch (error) {
-        console.error('Error fetching lab activities:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchActivities()
   }, [])
+
+  const openDeleteModal = (activity: any) => {
+    setActivityToDelete(activity)
+    setIsModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setActivityToDelete(null)
+    setIsModalOpen(false)
+  }
+
+  const handleDelete = async () => {
+    if (!activityToDelete) return
+    setIsDeleting(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/lab/activities/${activityToDelete.id}`, {
+        method: 'DELETE',
+      })
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.message || 'Error al eliminar la actividad')
+      }
+      // Refrescar la lista de actividades
+      await fetchActivities()
+      closeDeleteModal()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const columns = [
     {
       key: 'title',
       label: 'Título',
-      render: (_value: any, item: any) => {
-        // --- LOG DE DEPURACIÓN ---
-        console.log('[DEBUG] Renderizando celda "Título". Item:', item);
-        return (
-          <div>
-            <div className="font-medium text-gray-900">{item?.title || 'Sin Título'}</div>
-            <div className="text-sm text-gray-500">{item?.slug || ''}</div>
-          </div>
-        )
-      },
+      render: (_value: any, item: any) => (
+        <div>
+          <div className="font-medium text-gray-900">{item?.title || 'Sin Título'}</div>
+          <div className="text-sm text-gray-500">{item?.slug || ''}</div>
+        </div>
+      ),
     },
     {
       key: 'status',
       label: 'Estado',
-      render: (_value: any, item: any) => {
-        // --- LOG DE DEPURACIÓN ---
-        console.log('[DEBUG] Renderizando celda "Estado". Item:', item);
-        return (
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded-full ${
-              item?.status === 'active'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}
-          >
-            {item?.status === 'active' ? 'Activo' : 'Inactivo'}
-          </span>
-        )
-      },
+      render: (_value: any, item: any) => (
+        <span
+          className={`px-2 py-1 text-xs font-medium rounded-full ${
+            item?.status === 'active'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-yellow-100 text-yellow-800'
+          }`}
+        >
+          {item?.status === 'active' ? 'Activo' : 'Inactivo'}
+        </span>
+      ),
     },
     {
       key: 'created_at',
       label: 'Fecha de Creación',
-      render: (_value: any, item: any) => {
-        // --- LOG DE DEPURACIÓN ---
-        console.log('[DEBUG] Renderizando celda "Fecha". Item:', item);
-        return (
-          <div className="text-sm text-gray-500">
-            {item?.created_at ? new Date(item.created_at).toLocaleDateString() : 'Fecha inválida'}
-          </div>
-        )
-      },
+      render: (_value: any, item: any) => (
+        <div className="text-sm text-gray-500">
+          {item?.created_at ? new Date(item.created_at).toLocaleDateString() : 'Fecha inválida'}
+        </div>
+      ),
     },
     {
       key: 'actions',
       label: 'Acciones',
-      render: (_value: any, item: any) => {
-        // --- LOG DE DEPURACIÓN ---
-        console.log('[DEBUG] Renderizando celda "Acciones". Item:', item);
-        return (
-          <div className="flex space-x-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => item?.id && router.push(`/admin/lab/activities/edit/${item.id}`)}
-              disabled={!item?.id}
-            >
-              Editar
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              disabled={!item?.id}
-              // onClick={() => handleDelete(item.id)}
-            >
-              Eliminar
-            </Button>
-          </div>
-        )
-      },
+      render: (_value: any, item: any) => (
+        <div className="flex space-x-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => item?.id && router.push(`/admin/lab/activities/edit/${item.id}`)}
+            disabled={!item?.id}
+          >
+            Editar
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={!item?.id}
+            onClick={() => openDeleteModal(item)}
+          >
+            Eliminar
+          </Button>
+        </div>
+      ),
     },
   ]
 
@@ -145,6 +160,8 @@ export default function AdminLabActivitiesPage() {
           </Button>
         </div>
 
+        {error && <p className="text-red-500 bg-red-100 p-3 rounded-md">{error}</p>}
+
         <div className="bg-white rounded-lg shadow">
           <ResponsiveTable
             data={activities}
@@ -154,6 +171,16 @@ export default function AdminLabActivitiesPage() {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDelete}
+        title="Eliminar Actividad"
+        message={`¿Estás seguro de que quieres eliminar la actividad "${activityToDelete?.title}"? Esta acción no se puede deshacer.`}
+        confirmText="Sí, eliminar"
+        loading={isDeleting}
+      />
     </DashboardLayout>
   )
 }

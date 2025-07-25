@@ -211,23 +211,26 @@ async function authenticateToken(req, res, next) {
 
 // Middleware to check if user has required role
 function requireRole(...allowedRoles) {
+  const roles = allowedRoles.flat().map(role => role.toLowerCase()); // Convertir a minúsculas
   return (req, res, next) => {
-    if (!req.user) {
+    if (!req.user || !req.user.role) {
       return res.status(401).json({
         error: {
-          message: 'Authentication required',
-          code: 'NO_USER'
+          message: 'Authentication required or role not assigned',
+          code: 'NO_USER_OR_ROLE'
         }
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
-      logger.warn(`Access denied. User ${req.user.user_id} with role ${req.user.role} tried to access resource requiring roles: ${allowedRoles.join(', ')}`);
+    const userRole = req.user.role.toLowerCase(); // Convertir a minúsculas
+
+    if (!roles.includes(userRole)) {
+      logger.warn(`Access denied. User ${req.user.user_id} with role ${req.user.role} tried to access resource requiring roles: ${roles.join(', ')}`);
       return res.status(403).json({
         error: {
           message: 'Insufficient permissions',
           code: 'INSUFFICIENT_PERMISSIONS',
-          required_roles: allowedRoles,
+          required_roles: roles,
           user_role: req.user.role
         }
       });

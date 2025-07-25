@@ -2,44 +2,61 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { BookOpenIcon, PlusIcon, MagnifyingGlassIcon, FunnelIcon, ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, PlusIcon, MagnifyingGlassIcon, FunnelIcon, ExclamationTriangleIcon, ArrowPathIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useAuth } from '@/store/auth';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 
 const subjects = ['Ciencias Naturales', 'Matemáticas', 'Lenguaje', 'Historia', 'Artes'];
 const gradeLevels = ['Pre-Kínder', 'Kínder', '1º Básico', '2º Básico', '3º Básico', '4º Básico'];
 
 // Card component to display a single activity
-const ActivityCard = ({ activity }) => (
-  <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col">
-    <Link href={activity.href || `/lab/activity/${activity.slug}`} className="flex flex-col h-full">
-      <img src={activity.cover_image_url || 'https://via.placeholder.com/400x200.png?text=Actividad'} alt={activity.title || 'Actividad'} className="w-full h-40 object-cover" />
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="text-lg font-bold text-gray-800 mb-2">{activity.title || 'Actividad sin título'}</h3>
-        <p className="text-gray-600 text-sm mb-3 flex-grow">{activity.description || 'Sin descripción disponible.'}</p>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {activity.tags?.map(tag => (
-            <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-              {tag}
-            </span>
-          ))}
+const ActivityCard = ({ activity, onEdit, onDelete, currentUserId }) => {
+  const isCreator = activity.creator_id === currentUserId;
+
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col">
+      <Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full">
+        <img src={activity.cover_image_url || 'https://via.placeholder.com/400x200.png?text=Actividad'} alt={activity.title || 'Actividad'} className="w-full h-40 object-cover" />
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="text-lg font-bold text-gray-800 mb-2">{activity.title || 'Actividad sin título'}</h3>
+          <p className="text-gray-600 text-sm mb-3 flex-grow">{activity.description || 'Sin descripción disponible.'}</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {activity.tags?.map(tag => (
+              <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="border-t border-gray-200 pt-3 mt-auto">
+              <div className="flex justify-between text-xs text-gray-500">
+                  <span>{activity.target_cycle}</span>
+                  <span>{activity.duration_minutes ? `${activity.duration_minutes} min` : ''}</span>
+              </div>
+          </div>
         </div>
-        <div className="border-t border-gray-200 pt-3 mt-auto">
-            <div className="flex justify-between text-xs text-gray-500">
-                <span>{activity.target_cycle}</span>
-                <span>{activity.duration_minutes ? `${activity.duration_minutes} min` : ''}</span>
-            </div>
+      </Link>
+      {isCreator && (
+        <div className="p-2 bg-gray-50 border-t border-gray-200 flex justify-end space-x-2">
+          <Button variant="secondary" size="sm" onClick={() => onEdit(activity.id)}>
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="danger" size="sm" onClick={() => onDelete(activity)}>
+            <TrashIcon className="h-4 w-4" />
+          </Button>
         </div>
-      </div>
-    </Link>
-  </div>
-);
+      )}
+    </div>
+  );
+};
 
 // Main page component
 export default function LabActivitiesPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [activities, setActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +65,10 @@ export default function LabActivitiesPage() {
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [gradeFilter, setGradeFilter] = useState('all');
   
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activityToDelete, setActivityToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const fetchActivities = useCallback(async () => {
@@ -60,12 +81,10 @@ export default function LabActivitiesPage() {
       if (gradeFilter !== 'all') params.append('grade_level', gradeFilter);
 
       const response = await fetch(`/api/lab/activities?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('No se pudieron cargar las actividades.');
-      }
+      if (!response.ok) throw new Error('No se pudieron cargar las actividades.');
       const result = await response.json();
       setActivities(result.data || []);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -75,6 +94,37 @@ export default function LabActivitiesPage() {
   useEffect(() => {
     fetchActivities();
   }, [fetchActivities]);
+
+  const openDeleteModal = (activity: any) => {
+    setActivityToDelete(activity);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setActivityToDelete(null);
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = async () => {
+    if (!activityToDelete) return;
+    setIsDeleting(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/lab/activities/${activityToDelete.id}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message || 'Error al eliminar');
+      await fetchActivities();
+      closeDeleteModal();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEdit = (activityId: string) => {
+    alert(`Funcionalidad de editar (ID: ${activityId}) no implementada para profesores todavía.`);
+  };
 
   return (
     <DashboardLayout>
@@ -89,9 +139,12 @@ export default function LabActivitiesPage() {
               Explora, filtra y busca actividades didácticas para enriquecer tus clases.
             </p>
           </div>
-          <Button className="mt-4 sm:mt-0" onClick={() => router.push('/teacher/labs/activities/create')}>
+          <Button
+            variant="primary"
+            onClick={() => router.push('/teacher/labs/activities/create')}
+          >
             <PlusIcon className="h-5 w-5 mr-2" />
-            Crear Nueva Actividad
+            Crear Actividad
           </Button>
         </header>
 
@@ -159,7 +212,13 @@ export default function LabActivitiesPage() {
           ) : activities.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {activities.map(activity => (
-                    <ActivityCard key={activity.id} activity={activity} />
+                    <ActivityCard 
+                      key={activity.id} 
+                      activity={activity} 
+                      onEdit={handleEdit}
+                      onDelete={openDeleteModal}
+                      currentUserId={user?.id}
+                    />
                 ))}
             </div>
           ) : (
@@ -173,6 +232,15 @@ export default function LabActivitiesPage() {
           )}
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDelete}
+        title="Eliminar Actividad"
+        message={`¿Estás seguro de que quieres eliminar la actividad "${activityToDelete?.title}"? Esta acción no se puede deshacer.`}
+        confirmText="Sí, eliminar"
+        loading={isDeleting}
+      />
     </DashboardLayout>
   );
 }
