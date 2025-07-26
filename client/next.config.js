@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   experimental: {
     // App Router is enabled by default in Next.js 14+
@@ -23,6 +25,13 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
+    
+    // Configurar path aliases explícitamente
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+    
     return config;
   },
   async rewrites() {
