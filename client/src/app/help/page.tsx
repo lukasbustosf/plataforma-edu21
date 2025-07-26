@@ -23,65 +23,143 @@ export default function HelpPage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState('faq')
 
-  // FAQ data based on user role
+  // FAQ data agrupada por módulo
   const faqs = [
+    // LABORATORIOS MÓVILES
     {
       id: 1,
-      question: '¿Cómo puedo crear un quiz con IA?',
-      answer: 'Ve a "Crear Quiz", selecciona "Modo IA", ingresa el tema y nivel deseado. La IA generará preguntas automáticamente basadas en el currículum chileno.',
-      category: 'quizzes',
+      modulo: 'laboratorio',
+      question: '¿Cómo registro la ejecución de una actividad de laboratorio?',
+      answer: 'Desde el catálogo de actividades, selecciona la actividad y haz clic en “Registrar Ejecución”. Completa el formulario y guarda.',
       roles: ['TEACHER']
     },
     {
       id: 2,
-      question: '¿Cómo me uno a un juego educativo?',
-      answer: 'Ve a "Juegos", ingresa el código de sala que te proporcionó tu profesor, y haz clic en "Unirse". Espera en el lobby hasta que comience el juego.',
-      category: 'games',
-      roles: ['STUDENT']
+      modulo: 'laboratorio',
+      question: '¿Puedo adjuntar evidencias (fotos/documentos) al registrar una actividad?',
+      answer: 'Sí, puedes adjuntar imágenes o PDFs como evidencia al registrar la ejecución de una actividad.',
+      roles: ['TEACHER']
     },
     {
       id: 3,
-      question: '¿Puedo ver el progreso de mis estudiantes en tiempo real?',
-      answer: 'Sí, en tu dashboard puedes ver estadísticas en vivo, resultados de juegos recientes y alertas de rendimiento académico.',
-      category: 'analytics',
-      roles: ['TEACHER', 'ADMIN_ESCOLAR']
+      modulo: 'laboratorio',
+      question: '¿Dónde veo el historial de ejecuciones realizadas?',
+      answer: 'En el detalle de cada actividad, encontrarás la sección “Mis Ejecuciones Recientes” con el historial y evidencias asociadas.',
+      roles: ['TEACHER']
     },
     {
       id: 4,
-      question: '¿Cómo cambio mi contraseña?',
-      answer: 'Ve a Configuración > Perfil, haz clic en "Cambiar Contraseña" e ingresa tu contraseña actual y la nueva.',
-      category: 'account',
-      roles: ['ALL']
+      modulo: 'laboratorio',
+      question: '¿Cómo consulto las métricas de uso de una actividad?',
+      answer: 'En el detalle de la actividad, verás tarjetas con métricas como veces ejecutada, rating promedio y duración promedio.',
+      roles: ['TEACHER']
     },
     {
       id: 5,
-      question: '¿Qué formatos de juego están disponibles?',
-      answer: 'Ofrecemos Trivia Lightning, Board Race, Color Match, Memory Flip, Word Storm y más. Cada formato está diseñado para diferentes tipos de aprendizaje.',
-      category: 'games',
-      roles: ['TEACHER', 'STUDENT']
+      modulo: 'laboratorio',
+      question: '¿Qué hago si no encuentro una actividad en el catálogo?',
+      answer: 'Verifica los filtros aplicados o contacta a soporte si la actividad debería estar disponible.',
+      roles: ['TEACHER']
     },
+    // EVALUACIÓN GAMIFICADA
     {
       id: 6,
-      question: '¿Cómo funciona el sistema de logros?',
-      answer: 'Los estudiantes ganan logros por participar en juegos, mantener buenas calificaciones, y completar desafíos. Los logros aparecen en su perfil y dashboard.',
-      category: 'achievements',
-      roles: ['STUDENT', 'TEACHER']
+      modulo: 'evaluacion',
+      question: '¿Cómo accedo a las evaluaciones gamificadas?',
+      answer: 'Desde el menú principal, selecciona “Evaluación” y luego “Evaluación Gamificada”.',
+      roles: ['TEACHER']
     },
     {
       id: 7,
-      question: '¿Puedo exportar reportes de mi clase?',
-      answer: 'Sí, ve a "Reportes", selecciona el período y tipo de reporte que necesitas, y haz clic en "Exportar a Excel" o "Exportar a PDF".',
-      category: 'reports',
-      roles: ['TEACHER', 'ADMIN_ESCOLAR']
+      modulo: 'evaluacion',
+      question: '¿Cómo asigno una evaluación gamificada a mis estudiantes?',
+      answer: 'Selecciona la evaluación y usa la opción “Asignar a clase” para elegir los estudiantes o grupos.',
+      roles: ['TEACHER']
     },
     {
       id: 8,
-      question: '¿EDU21 es accesible para estudiantes con discapacidades?',
-      answer: 'Sí, incluimos TTS (texto a voz), navegación por teclado, alto contraste, soporte para lectores de pantalla y más funciones de accesibilidad.',
-      category: 'accessibility',
+      modulo: 'evaluacion',
+      question: '¿Puedo ver los resultados y el progreso de mis estudiantes en tiempo real?',
+      answer: 'Sí, en la sección de resultados puedes ver el avance y puntaje de cada estudiante en tiempo real.',
+      roles: ['TEACHER']
+    },
+    {
+      id: 9,
+      modulo: 'evaluacion',
+      question: '¿Qué tipos de juegos están disponibles en la evaluación gamificada?',
+      answer: 'Actualmente hay Trivia Lightning, Board Race, Color Match, Memory Flip, Word Storm y más.',
+      roles: ['TEACHER']
+    },
+    {
+      id: 10,
+      modulo: 'evaluacion',
+      question: '¿Cómo se calcula el puntaje en los juegos?',
+      answer: 'El puntaje depende de la rapidez y precisión de las respuestas en cada juego.',
+      roles: ['TEACHER']
+    },
+    // CONFIGURACIÓN
+    {
+      id: 11,
+      modulo: 'configuracion',
+      question: '¿Cómo cambio mi contraseña?',
+      answer: 'Ve a Configuración > Perfil, haz clic en “Cambiar Contraseña” e ingresa tu contraseña actual y la nueva.',
       roles: ['ALL']
-    }
-  ]
+    },
+    {
+      id: 12,
+      modulo: 'configuracion',
+      question: '¿Puedo actualizar mi información personal?',
+      answer: 'Sí, en Configuración puedes editar tus datos personales y preferencias.',
+      roles: ['ALL']
+    },
+    {
+      id: 13,
+      modulo: 'configuracion',
+      question: '¿Cómo configuro mis preferencias de notificación?',
+      answer: 'En Configuración puedes activar o desactivar notificaciones por correo y en la plataforma.',
+      roles: ['ALL']
+    },
+    // GENERAL
+    {
+      id: 14,
+      modulo: 'general',
+      question: '¿A quién contacto si tengo problemas técnicos?',
+      answer: 'Puedes escribir a lbustos@edu21.cl, schacon@edu21.cl o mbustos@edu21.cl, o llamar al 232144445.',
+      roles: ['ALL']
+    },
+    {
+      id: 15,
+      modulo: 'general',
+      question: '¿La plataforma funciona en dispositivos móviles?',
+      answer: 'Sí, EDU21 es compatible con computadores, tablets y smartphones.',
+      roles: ['ALL']
+    },
+    {
+      id: 16,
+      modulo: 'general',
+      question: '¿Qué hago si olvido mi contraseña?',
+      answer: 'Usa la opción “¿Olvidaste tu contraseña?” en la pantalla de login para recuperarla.',
+      roles: ['ALL']
+    },
+  ];
+
+  // Filtro por módulo
+  const [faqModule, setFaqModule] = useState('all');
+  const filteredFaqs = faqs.filter(faq =>
+    (faq.roles.includes('ALL') || faq.roles.includes(user?.role || '')) &&
+    (faqModule === 'all' || faq.modulo === faqModule) &&
+    (searchQuery === '' ||
+     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     faq.answer.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const faqModules = [
+    { id: 'all', name: 'Todos los módulos' },
+    { id: 'laboratorio', name: 'Laboratorios Móviles' },
+    { id: 'evaluacion', name: 'Evaluación Gamificada' },
+    { id: 'configuracion', name: 'Configuración' },
+    { id: 'general', name: 'General' },
+  ];
 
   const tutorials = [
     {
@@ -153,20 +231,13 @@ export default function HelpPage() {
     }
   ]
 
-  const filteredFaqs = faqs.filter(faq => 
-    (faq.roles.includes('ALL') || faq.roles.includes(user?.role || '')) &&
-    (searchQuery === '' || 
-     faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     faq.answer.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
-
   const filteredTutorials = tutorials.filter(tutorial =>
     tutorial.roles.includes('ALL') || tutorial.roles.includes(user?.role || '')
   )
 
   const tabs = [
     { id: 'faq', name: 'Preguntas Frecuentes', icon: QuestionMarkCircleIcon },
-    { id: 'tutorials', name: 'Tutoriales', icon: VideoCameraIcon },
+    { id: 'tutorials', name: 'Tutoriales (próximamente)', icon: VideoCameraIcon },
     { id: 'contact', name: 'Contacto', icon: ChatBubbleLeftRightIcon }
   ]
 
@@ -223,6 +294,19 @@ export default function HelpPage() {
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
                   Preguntas Frecuentes
                 </h2>
+                {/* Filtro por módulo */}
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {faqModules.map((mod) => (
+                    <Button
+                      key={mod.id}
+                      size="sm"
+                      variant={faqModule === mod.id ? 'primary' : 'outline'}
+                      onClick={() => setFaqModule(mod.id)}
+                    >
+                      {mod.name}
+                    </Button>
+                  ))}
+                </div>
                 {filteredFaqs.length === 0 ? (
                   <div className="text-center py-8">
                     <QuestionMarkCircleIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -292,48 +376,19 @@ export default function HelpPage() {
             {activeTab === 'contact' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Contacto y Soporte
+                  Centro de Ayuda EDU21
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {contactOptions.map((option) => (
-                    <div key={option.id} className="border border-gray-200 rounded-lg p-6">
-                      <h3 className="font-medium text-gray-900 mb-2">{option.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{option.description}</p>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-                          <a href={`mailto:${option.contact}`} className="text-sm text-blue-600 hover:underline">
-                            {option.contact}
-                          </a>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <PhoneIcon className="h-4 w-4 text-gray-400" />
-                          <a href={`tel:${option.phone}`} className="text-sm text-blue-600 hover:underline">
-                            {option.phone}
-                          </a>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {option.hours}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="font-medium text-blue-900 mb-2">¿Necesitas ayuda inmediata?</h3>
-                  <p className="text-sm text-blue-700 mb-4">
-                    Nuestro equipo de soporte está disponible para ayudarte. También puedes revisar nuestras redes sociales para actualizaciones y consejos.
+                <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                  <h3 className="font-medium text-gray-900 mb-2">Contacto</h3>
+                  <p className="text-sm text-gray-700 mb-1">
+                    <strong>Correo:</strong> lbustos@edu21.cl, schacon@edu21.cl, mbustos@edu21.cl
                   </p>
-                  <div className="space-x-3">
-                    <Button variant="outline" size="sm">
-                      Chat en Vivo
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      WhatsApp
-                    </Button>
-                  </div>
+                  <p className="text-sm text-gray-700 mb-1">
+                    <strong>Fono central centro de ayuda:</strong> 232144445
+                  </p>
+                  <p className="text-sm text-gray-700 mb-1">
+                    <strong>Horario de atención:</strong> Lunes a viernes 8:30-17:30
+                  </p>
                 </div>
               </div>
             )}

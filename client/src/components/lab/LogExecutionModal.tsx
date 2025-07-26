@@ -1,41 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, Fragment, ChangeEvent } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { LabActivity } from '@/types/lab';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
-const logExecutionSchema = z.object({
-  student_count: z.number().min(1, 'Debe haber al menos 1 estudiante.'),
-  duration_actual_minutes: z.number().min(1, 'La duración debe ser de al menos 1 minuto.'),
-  success_rating: z.number().min(1).max(5),
-  engagement_rating: z.number().min(1).max(5),
-  difficulty_perceived: z.number().min(1).max(5),
-  notes: z.string().optional(),
-  challenges_faced: z.string().optional(),
-});
-
-type LogExecutionFormValues = z.infer<typeof logExecutionSchema>;
+interface LogExecutionFormValues {
+  student_count: number;
+  duration_actual_minutes: number;
+  success_rating: number;
+  engagement_rating: number;
+  difficulty_perceived: number;
+  notes: string;
+  challenges_faced: string;
+}
 
 interface LogExecutionModalProps {
-  activity: LabActivity;
+  activity: any;
   children: React.ReactNode;
 }
 
@@ -48,7 +39,6 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
     formState: { errors, isSubmitting },
     reset,
   } = useForm<LogExecutionFormValues>({
-    resolver: zodResolver(logExecutionSchema),
     defaultValues: {
       student_count: 25,
       duration_actual_minutes: activity.duration_minutes || 30,
@@ -109,15 +99,15 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Registrar Ejecución de Actividad</DialogTitle>
-          <DialogDescription>
+          <p className="text-sm text-gray-600">
             Completa los detalles de la implementación de &quot;{activity.title}&quot;.
-          </DialogDescription>
+          </p>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4" encType="multipart/form-data">
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="student_count">N° de Estudiantes</Label>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="student_count">N° de Estudiantes</label>
                 <Controller
                   name="student_count"
                   control={control}
@@ -133,7 +123,7 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
                 {errors.student_count && <p className="text-red-500 text-xs mt-1">{errors.student_count.message}</p>}
               </div>
               <div>
-                <Label htmlFor="duration_actual_minutes">Duración Real (min)</Label>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="duration_actual_minutes">Duración Real (min)</label>
                  <Controller
                   name="duration_actual_minutes"
                   control={control}
@@ -151,56 +141,62 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
             </div>
 
             <div>
-              <Label>Nivel de Éxito (1-5)</Label>
+              <label className="block text-sm font-medium text-gray-700">Nivel de Éxito (1-5)</label>
               <Controller
                 name="success_rating"
                 control={control}
                 render={({ field }) => (
-                  <Slider
-                    value={[field.value]}
-                    onValueChange={(value) => field.onChange(value[0])}
-                    max={5}
+                  <input
+                    type="range"
+                    value={field.value}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
                     min={1}
+                    max={5}
                     step={1}
+                    className="w-full"
                   />
                 )}
               />
             </div>
             <div>
-              <Label>Nivel de Involucramiento (1-5)</Label>
+              <label className="block text-sm font-medium text-gray-700">Nivel de Involucramiento (1-5)</label>
                <Controller
                 name="engagement_rating"
                 control={control}
                 render={({ field }) => (
-                  <Slider
-                    value={[field.value]}
-                    onValueChange={(value) => field.onChange(value[0])}
-                    max={5}
+                  <input
+                    type="range"
+                    value={field.value}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
                     min={1}
+                    max={5}
                     step={1}
+                    className="w-full"
                   />
                 )}
               />
             </div>
              <div>
-              <Label>Dificultad Percibida (1-5)</Label>
+              <label className="block text-sm font-medium text-gray-700">Dificultad Percibida (1-5)</label>
                <Controller
                 name="difficulty_perceived"
                 control={control}
                 render={({ field }) => (
-                  <Slider
-                    value={[field.value]}
-                    onValueChange={(value) => field.onChange(value[0])}
-                    max={5}
+                  <input
+                    type="range"
+                    value={field.value}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
                     min={1}
+                    max={5}
                     step={1}
+                    className="w-full"
                   />
                 )}
               />
             </div>
 
             <div>
-              <Label htmlFor="notes">Notas y Observaciones</Label>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="notes">Notas y Observaciones</label>
               <Controller
                 name="notes"
                 control={control}
@@ -208,7 +204,7 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
               />
             </div>
              <div>
-              <Label htmlFor="challenges_faced">Desafíos Enfrentados (separados por coma)</Label>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="challenges_faced">Desafíos Enfrentados (separados por coma)</label>
               <Controller
                 name="challenges_faced"
                 control={control}
@@ -228,12 +224,12 @@ export function LogExecutionModal({ activity, children }: LogExecutionModalProps
               {evidenceFile && <span style={{ fontSize: 12, color: '#555' }}>Archivo seleccionado: {evidenceFile.name}</span>}
             </div>
           </div>
-          <DialogFooter>
+          <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Registrando...' : 'Registrar Ejecución'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

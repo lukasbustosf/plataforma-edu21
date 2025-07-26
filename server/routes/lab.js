@@ -80,7 +80,7 @@ router.get('/materials/:id', authenticateToken, async (req, res) => {
 router.get('/activities', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const { searchTerm, grade_level, page = 1, limit = 12 } = req.query;
+    const { searchTerm, grade_level, subject, lab_material_id, page = 1, limit = 12 } = req.query;
     const filterConditions = [];
     if (searchTerm) {
       filterConditions.push({
@@ -92,6 +92,12 @@ router.get('/activities', authenticateToken, async (req, res) => {
     }
     if (grade_level && grade_level !== 'all') {
       filterConditions.push({ target_cycle: grade_level });
+    }
+    if (subject && subject !== 'all') {
+      filterConditions.push({ subject: subject });
+    }
+    if (lab_material_id && lab_material_id !== 'all') {
+      filterConditions.push({ lab_material_id: parseInt(lab_material_id) });
     }
     const whereClause = {
       AND: [
@@ -167,6 +173,7 @@ router.get('/activities/:slug', authenticateToken, async (req, res) => {
             execution_date: true,
             student_count: true,
             success_rating: true,
+            duration_actual_minutes: true,
             notes: true,
             courses: {
               select: {
@@ -207,6 +214,8 @@ router.get('/activities/:slug', authenticateToken, async (req, res) => {
       }))
     };
 
+    console.log('Activity data sent to frontend:', JSON.stringify(responseData, null, 2));
+
     res.json({
       success: true,
       data: responseData
@@ -240,7 +249,10 @@ router.post('/activities', authenticateToken, requireRole('teacher', 'admin_esco
       tags,
       target_cycle,
       duration_minutes,
-      // Agrega aquí los demás campos requeridos
+      group_size,
+      difficulty_level,
+      lab_material_id,
+      // Puedes agregar más campos aquí si es necesario
     } = req.body;
 
     // Validación básica
@@ -250,18 +262,23 @@ router.post('/activities', authenticateToken, requireRole('teacher', 'admin_esco
 
     const slug = slugify(title);
 
+    // Construir el objeto de datos dinámicamente, solo agregando los campos si existen
+    const activityData = {
+      title,
+      description,
+      cover_image_url,
+      tags: tags || [],
+      target_cycle,
+      duration_minutes: Number(duration_minutes),
+      status: 'active',
+      slug,
+    };
+    if (group_size !== undefined) activityData.group_size = Number(group_size);
+    if (difficulty_level !== undefined) activityData.difficulty_level = Number(difficulty_level);
+    if (lab_material_id !== undefined && lab_material_id !== null && lab_material_id !== "") activityData.lab_material_id = Number(lab_material_id);
+
     const newActivity = await prisma.lab_activity.create({
-      data: {
-        title,
-        description,
-        cover_image_url,
-        tags: tags || [],
-        target_cycle,
-        duration_minutes: Number(duration_minutes),
-        status: 'active',
-        slug,
-        // Agrega aquí los demás campos requeridos
-      },
+      data: activityData,
     });
 
     res.status(201).json({ success: true, data: newActivity });
@@ -271,8 +288,99 @@ router.post('/activities', authenticateToken, requireRole('teacher', 'admin_esco
   }
 });
 
-router.put('/activities/:id', authenticateToken, requireRole('superadmin', 'admin_escolar', 'teacher'), async (req, res) => {
-  // ... (código de la ruta de actualización)
+router.put('/activities/:id', authenticateToken, requireRole('SUPER_ADMIN_FULL', 'ADMIN_ESCOLAR', 'TEACHER'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const userId = req.user.user_id;
+
+    console.log('🔍 [DEBUG PUT] Inicio del endpoint');
+    console.log('🔍 [DEBUG PUT] ID actividad:', id);
+    console.log('🔍 [DEBUG PUT] User recibido:', req.user);
+    console.log('🔍 [DEBUG PUT] Token recibido:', req.headers.authorization);
+
+    // Validar que la actividad existe y el usuario tiene permisos
+    const existingActivity = await prisma.lab_activity.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingActivity) {
+      return res.status(404).json({ success: false, message: 'Actividad no encontrada' });
+    }
+
+    console.log('🔍 [DEBUG PUT] Actividad encontrada:', {
+      id: existingActivity.id,
+      creator_id: existingActivity.creator_id,
+      title: existingActivity.title
+    });
+
+    // Solo permitir edición si es el creador o es SUPER_ADMIN_FULL
+    const userRole = req.user.role;
+    const isSuperAdmin = userRole === 'SUPER_ADMIN_FULL';
+    const isCreator = existingActivity.creator_id === userId;
+    const hasNoCreator = existingActivity.creator_id === null;
+
+    console.log('🔍 [DEBUG PUT] Permisos edición actividad:', {
+      id_actividad: id,
+      userRole,
+      userId,
+      creatorId: existingActivity.creator_id,
+      isSuperAdmin,
+      isCreator,
+      hasNoCreator
+    });
+
+    // Solo Super Admin puede editar actividades sin creador o actividades que no creó
+    if (!isCreator && !isSuperAdmin) {
+      return res.status(403).json({ 
+        success: false, 
+        message: hasNoCreator 
+          ? 'No tienes permisos para editar esta actividad del sistema. Solo los Super Administradores pueden editar actividades sin creador.' 
+          : 'No tienes permisos para editar esta actividad. Solo puedes editar las actividades que creaste.'
+      });
+    }
+
+    console.log('🔍 [DEBUG PUT] Permisos aprobados, procediendo con actualización');
+
+    // Procesar arrays que vienen como strings separados por saltos de línea
+    const processedData = {
+      ...updateData,
+      learning_objectives: updateData.learning_objectives ? 
+        updateData.learning_objectives.split('\n').filter(obj => obj.trim()) : [],
+      resource_urls: updateData.resource_urls ? 
+        updateData.resource_urls.split('\n').filter(url => url.trim()) : [],
+      oa_ids: updateData.oa_ids ? 
+        updateData.oa_ids.split('\n').filter(oa => oa.trim()) : [],
+      tags: updateData.tags ? 
+        updateData.tags.split('\n').filter(tag => tag.trim()) : [],
+      lab_material_id: updateData.lab_material_id ? parseInt(updateData.lab_material_id) : null,
+      duration_minutes: updateData.duration_minutes ? parseInt(updateData.duration_minutes) : null,
+      group_size: updateData.group_size ? parseInt(updateData.group_size) : null,
+      difficulty_level: updateData.difficulty_level ? parseInt(updateData.difficulty_level) : null,
+      preparation_time_minutes: updateData.preparation_time_minutes ? parseInt(updateData.preparation_time_minutes) : null,
+      cleanup_time_minutes: updateData.cleanup_time_minutes ? parseInt(updateData.cleanup_time_minutes) : null,
+      updated_at: new Date()
+    };
+
+    // Actualizar la actividad
+    const updatedActivity = await prisma.lab_activity.update({
+      where: { id: id },
+      data: processedData,
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Actividad actualizada correctamente',
+      data: updatedActivity 
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al actualizar la actividad',
+      error: error.message 
+    });
+  }
 });
 
 router.delete('/activities/:id', authenticateToken, async (req, res) => {
@@ -300,8 +408,10 @@ router.post('/activity-logs', authenticateToken, requireRole('teacher'), uploadE
   const teacher_id = req.user?.user_id;
   const school_id = req.user?.school_id;
 
-  // Convertir student_count a número
+  // Convertir student_count, duration_actual_minutes y success_rating a número
   const studentCount = parseInt(student_count, 10);
+  const durationActualMinutes = duration_actual_minutes !== undefined ? parseInt(duration_actual_minutes, 10) : null;
+  const successRating = success_rating !== undefined ? parseInt(success_rating, 10) : null;
 
   // Validación básica
   if (!activity_id || !student_count || !execution_date) {
@@ -328,8 +438,8 @@ router.post('/activity-logs', authenticateToken, requireRole('teacher'), uploadE
           course_id: courseIdToSave,
           execution_date: new Date(execution_date),
           student_count: studentCount,
-          duration_actual_minutes,
-          success_rating,
+          duration_actual_minutes: durationActualMinutes,
+          success_rating: successRating,
           engagement_rating,
           difficulty_perceived,
           notes,
@@ -341,7 +451,11 @@ router.post('/activity-logs', authenticateToken, requireRole('teacher'), uploadE
       if (req.file) {
         const fileUrl = `/uploads/lab-evidence/${req.file.filename}`;
         const mimeType = req.file.mimetype;
-        const fileType = mimeType.startsWith('image/') ? 'image' : (mimeType === 'application/pdf' ? 'pdf' : 'other');
+        let fileType = 'document';
+        if (mimeType.startsWith('image/')) fileType = 'photo';
+        else if (mimeType.startsWith('video/')) fileType = 'video';
+        else if (mimeType.startsWith('audio/')) fileType = 'audio';
+        else if (mimeType === 'application/pdf') fileType = 'document';
         await tx.lab_evidence.create({
           data: {
             activity_log_id: newLog.id,
@@ -357,35 +471,52 @@ router.post('/activity-logs', authenticateToken, requireRole('teacher'), uploadE
       }
 
       // 2. Update or create the activity metrics
+      // Promedio de duración solo con registros que tengan duration_actual_minutes
+      const logsWithDuration = await tx.lab_activity_log.findMany({
+        where: {
+          activity_id,
+          duration_actual_minutes: { not: null },
+        },
+      });
+      const totalWithDuration = logsWithDuration.length;
+      const sumDuration = logsWithDuration.reduce((acc, log) => acc + (typeof log.duration_actual_minutes === 'number' ? log.duration_actual_minutes : parseInt(log.duration_actual_minutes || '0', 10)), 0);
+      const avgDuration = totalWithDuration > 0 ? sumDuration / totalWithDuration : null;
+
+      // Promedio de rating solo con registros que tengan success_rating
+      const logsWithRating = await tx.lab_activity_log.findMany({
+        where: {
+          activity_id,
+          success_rating: { not: null },
+        },
+      });
+      const totalWithRating = logsWithRating.length;
+      const sumRating = logsWithRating.reduce((acc, log) => acc + (typeof log.success_rating === 'number' ? log.success_rating : parseInt(log.success_rating || '0', 10)), 0);
+      const avgRating = totalWithRating > 0 ? sumRating / totalWithRating : null;
+
       const currentMetrics = await tx.lab_activity_metrics.findUnique({
         where: { activity_id },
       });
 
       if (currentMetrics) {
-        // Calculate new averages
-        const totalExecutions = currentMetrics.total_executions + 1;
-        const newAvgRating = ((currentMetrics.avg_rating * currentMetrics.total_executions) + success_rating) / totalExecutions;
-        const newAvgDuration = ((currentMetrics.avg_duration_minutes * currentMetrics.total_executions) + duration_actual_minutes) / totalExecutions;
-        
         await tx.lab_activity_metrics.update({
           where: { activity_id },
           data: {
-            total_executions: { increment: 1 },
-            avg_rating: newAvgRating,
-            avg_duration_minutes: newAvgDuration,
+            total_executions: await tx.lab_activity_log.count({ where: { activity_id } }),
+            avg_rating: avgRating,
+            avg_duration_minutes: avgDuration,
             last_execution_date: new Date(execution_date),
-            // Note: unique_teachers and unique_schools would require more complex logic
+            // unique_teachers y unique_schools pueden mejorarse en el futuro
           },
         });
       } else {
         await tx.lab_activity_metrics.create({
           data: {
             activity_id,
-            total_executions: 1,
+            total_executions: await tx.lab_activity_log.count({ where: { activity_id } }),
             unique_teachers: 1,
             unique_schools: 1,
-            avg_rating: success_rating,
-            avg_duration_minutes: duration_actual_minutes,
+            avg_rating: avgRating,
+            avg_duration_minutes: avgDuration,
             last_execution_date: new Date(execution_date),
           },
         });

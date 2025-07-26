@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 
 const NotificationBell: React.FC = () => {
   const { data, isLoading, error } = useQuery(
-    'notifications',
+    ['notifications'],
     () => api.getNotifications(),
     { refetchInterval: 30000 } // Refetch every 30 seconds
   );

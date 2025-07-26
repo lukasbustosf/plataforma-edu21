@@ -14,7 +14,14 @@ const subjects = ['Ciencias Naturales', 'Matemáticas', 'Lenguaje', 'Historia', 
 const gradeLevels = ['Pre-Kínder', 'Kínder', '1º Básico', '2º Básico', '3º Básico', '4º Básico'];
 
 // Card component to display a single activity
-const ActivityCard = ({ activity, onEdit, onDelete, currentUserId }) => {
+interface ActivityCardProps {
+  activity: any;
+  onEdit: (id: string) => void;
+  onDelete: (activity: any) => void;
+  currentUserId: string;
+}
+
+const ActivityCard = ({ activity, onEdit, onDelete, currentUserId }: ActivityCardProps) => {
   const isCreator = activity.creator_id === currentUserId;
 
   return (
@@ -25,7 +32,7 @@ const ActivityCard = ({ activity, onEdit, onDelete, currentUserId }) => {
           <h3 className="text-lg font-bold text-gray-800 mb-2">{activity.title || 'Actividad sin título'}</h3>
           <p className="text-gray-600 text-sm mb-3 flex-grow">{activity.description || 'Sin descripción disponible.'}</p>
           <div className="flex flex-wrap gap-2 mb-3">
-            {activity.tags?.map(tag => (
+            {activity.tags?.map((tag: any) => (
               <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
                 {tag}
               </span>
@@ -58,18 +65,32 @@ export default function LabActivitiesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [activities, setActivities] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [gradeFilter, setGradeFilter] = useState('all');
+  const [materialFilter, setMaterialFilter] = useState('all');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activityToDelete, setActivityToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const fetchMaterials = useCallback(async () => {
+    try {
+      const response = await fetch('/api/lab/materials');
+      if (response.ok) {
+        const result = await response.json();
+        setMaterials(result.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching materials:', err);
+    }
+  }, []);
 
   const fetchActivities = useCallback(async () => {
     setIsLoading(true);
@@ -79,6 +100,7 @@ export default function LabActivitiesPage() {
       if (debouncedSearchTerm) params.append('searchTerm', debouncedSearchTerm);
       if (subjectFilter !== 'all') params.append('subject', subjectFilter);
       if (gradeFilter !== 'all') params.append('grade_level', gradeFilter);
+      if (materialFilter !== 'all') params.append('lab_material_id', materialFilter);
 
       const response = await fetch(`/api/lab/activities?${params.toString()}`);
       if (!response.ok) throw new Error('No se pudieron cargar las actividades.');
@@ -89,11 +111,12 @@ export default function LabActivitiesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearchTerm, subjectFilter, gradeFilter]);
+  }, [debouncedSearchTerm, subjectFilter, gradeFilter, materialFilter]);
 
   useEffect(() => {
+    fetchMaterials();
     fetchActivities();
-  }, [fetchActivities]);
+  }, [fetchMaterials, fetchActivities]);
 
   const openDeleteModal = (activity: any) => {
     setActivityToDelete(activity);
@@ -150,7 +173,7 @@ export default function LabActivitiesPage() {
 
         {/* Filters and Search */}
         <div className="bg-white p-4 rounded-lg shadow">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="md:col-span-2">
                     <label htmlFor="search" className="sr-only">Buscar</label>
                     <div className="relative">
@@ -193,6 +216,20 @@ export default function LabActivitiesPage() {
                         ))}
                     </select>
                 </div>
+                <div>
+                    <label htmlFor="material" className="sr-only">Material</label>
+                    <select
+                        id="material"
+                        value={materialFilter}
+                        onChange={(e) => setMaterialFilter(e.target.value)}
+                        className="input w-full"
+                    >
+                        <option value="all">Todos los materiales</option>
+                        {materials.map((material: any) => (
+                            <option key={material.id} value={material.id}>{material.name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -211,13 +248,13 @@ export default function LabActivitiesPage() {
             </div>
           ) : activities.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {activities.map(activity => (
+                {activities.map((activity: any) => (
                     <ActivityCard 
                       key={activity.id} 
                       activity={activity} 
                       onEdit={handleEdit}
                       onDelete={openDeleteModal}
-                      currentUserId={user?.id}
+                      currentUserId={user?.user_id || ''}
                     />
                 ))}
             </div>

@@ -1,487 +1,482 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/store/auth'
-import { api } from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import React, { useState, useEffect } from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { 
-  PlusIcon, 
-  PlayIcon, 
-  BookOpenIcon, 
-  ChartBarIcon,
-  UsersIcon,
-  ClockIcon,
-  SparklesIcon,
-  EyeIcon,
+  ChartBarIcon, 
+  ClockIcon, 
+  UserGroupIcon, 
+  StarIcon,
+  CalendarIcon,
   AcademicCapIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/Button'
-import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { StatsGrid } from '@/components/ui/StatsGrid'
-import { formatDate, getGameFormatDisplayName } from '@/lib/utils'
-import type { Quiz, Class, GameSession } from '@/types'
+  TrophyIcon,
+  LightBulbIcon,
+  ArrowTrendingUpIcon,
+  BookOpenIcon,
+  BeakerIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  PlusIcon
+} from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
+import { useAuth } from '@/store/auth';
 
-export default function TeacherDashboardPage() {
-  const router = useRouter()
-  const { user, canCreateQuiz, isAuthenticated, isLoading } = useAuth()
-  const [selectedPeriod, setSelectedPeriod] = useState('week')
+interface DashboardStats {
+  totalActivities: number;
+  totalExecutions: number;
+  totalStudents: number;
+  averageRating: number;
+  thisWeekExecutions: number;
+  pendingActivities: number;
+}
 
-  // Debug auth state
+interface RecentActivity {
+  id: string;
+  title: string;
+  executionDate: string;
+  studentCount: number;
+  rating: number;
+  duration: number;
+  status: 'completed' | 'pending' | 'in-progress';
+}
+
+interface StudentProgress {
+  name: string;
+  avatar: string;
+  progress: number;
+  lastActivity: string;
+  achievements: number;
+}
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  progress: number;
+  maxProgress: number;
+}
+
+export default function TeacherDashboard() {
+  const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalActivities: 0,
+    totalExecutions: 0,
+    totalStudents: 0,
+    averageRating: 0,
+    thisWeekExecutions: 0,
+    pendingActivities: 0
+  });
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [studentProgress, setStudentProgress] = useState<StudentProgress[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    console.log('=== TEACHER DASHBOARD LOAD ===')
-    console.log('Auth state:', { isAuthenticated, isLoading, userRole: user?.role, userEmail: user?.email })
-    console.log('User object:', user)
-    console.log('Can create quiz:', canCreateQuiz)
-  }, [isAuthenticated, isLoading, user, canCreateQuiz])
+    // Simular carga de datos - en producción esto vendría de la API
+    setTimeout(() => {
+      setStats({
+        totalActivities: 12,
+        totalExecutions: 47,
+        totalStudents: 156,
+        averageRating: 4.8,
+        thisWeekExecutions: 8,
+        pendingActivities: 3
+      });
 
-  // Fetch teacher's classes
-  const { data: classesData, isLoading: classesLoading } = useQuery(
-    'teacher-classes',
-    () => api.getClasses(),
-    {
-      enabled: !!user?.user_id
-    }
-  )
-
-  // Fetch teacher's quizzes
-  const { data: quizzesData, isLoading: quizzesLoading } = useQuery(
-    'teacher-quizzes',
-    () => api.getQuizzes({ limit: 6 }),
-    {
-      enabled: !!user?.user_id
-    }
-  )
-
-  const classes = classesData?.classes || []
-  const quizzes = quizzesData?.quizzes || []
-
-  // Calculate stats
-  const totalStudents = classes.reduce((acc, cls) => acc + (cls.students?.length || 0), 0)
-  const activeQuizzes = quizzes.filter(quiz => quiz.mode === 'manual').length
-  const aiQuizzes = quizzes.filter(quiz => quiz.mode === 'ai').length
-
-  // Convert stats to StatsGrid format
-  const teacherStats = [
-    {
-      id: 'classes',
-      label: 'Mis Clases',
-      value: classes.length,
-      icon: <AcademicCapIcon className="h-5 w-5" />,
-      color: 'blue' as const,
-      change: { value: 2, type: 'increase' as const, period: 'este trimestre' }
-    },
-    {
-      id: 'students',
-      label: 'Total Estudiantes',
-      value: totalStudents,
-      icon: <UsersIcon className="h-5 w-5" />,
-      color: 'green' as const,
-      change: { value: 15, type: 'increase' as const, period: 'este mes' }
-    },
-    {
-      id: 'quizzes',
-      label: 'Quizzes Creados',
-      value: quizzes.length,
-      icon: <DocumentTextIcon className="h-5 w-5" />,
-      color: 'purple' as const,
-      change: { value: 8, type: 'increase' as const, period: 'esta semana' }
-    },
-    {
-      id: 'games',
-      label: 'Juegos Activos',
-      value: 3,
-      icon: <PlayIcon className="h-5 w-5" />,
-      color: 'yellow' as const
-    }
-  ]
-
-  const quickActions = [
-    {
-      icon: <PlusIcon className="h-5 w-5" />,
-      label: 'Crear Quiz Manual',
-      description: 'Crear nuevo cuestionario paso a paso',
-      onClick: () => router.push('/teacher/quiz/create'),
-      color: 'blue' as const
-    },
-    {
-      icon: <SparklesIcon className="h-5 w-5" />,
-      label: 'Generar con IA',
-      description: 'Crear quiz automáticamente con inteligencia artificial',
-      onClick: () => router.push('/teacher/quiz/create?mode=ai'),
-      color: 'purple' as const
-    },
-    {
-      icon: <PlayIcon className="h-5 w-5" />,
-      label: 'Evaluación Gamificada',
-      description: 'Crear evaluación interactiva con juegos y skins',
-      onClick: () => router.push('/teacher/evaluation-gamified/create'),
-      color: 'green' as const
-    },
-    {
-      icon: <BookOpenIcon className="h-5 w-5" />,
-      label: 'Planificar Clase',
-      description: 'Crear nueva planificación de clase',
-      onClick: () => router.push('/teacher/lesson/create'),
-      color: 'yellow' as const
-    }
-  ]
-
-  const recentQuizzes = quizzes.slice(0, 3).map(quiz => ({
-    id: quiz.quiz_id,
-    title: quiz.title,
-    subject: 'General', // Quiz doesn't have subject field in type definition
-    questions: quiz.questions?.length || 0,
-    createdAt: quiz.created_at,
-    mode: quiz.mode,
-    plays: Math.floor(Math.random() * 50) + 1 // Mock data
-  }))
-
-  const myClasses = classes.slice(0, 3).map(cls => ({
-    id: cls.class_id,
-    name: cls.class_name,
-    subject: cls.subjects?.subject_name || 'Sin asignar',
-    studentCount: cls.students?.length || 0,
-    schedule: 'Por definir', // Class has schedule_json, not schedule
-    nextClass: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000)
-  }))
-
-  const handleStartGame = async (quizId: string) => {
-    try {
-      const gameSession = await api.createGameSession({
-        quiz_id: quizId,
-        format: 'trivia_lightning',
-        settings: {
-          max_players: 30,
-          time_limit: 30,
-          show_correct_answers: true,
-          accessibility_mode: true,
-          tts_enabled: true
+      setRecentActivities([
+        {
+          id: '1',
+          title: 'El hábitat de los animales',
+          executionDate: '2025-07-25',
+          studentCount: 25,
+          rating: 5,
+          duration: 45,
+          status: 'completed'
+        },
+        {
+          id: '2',
+          title: 'Conteo con material concreto',
+          executionDate: '2025-07-24',
+          studentCount: 30,
+          rating: 4,
+          duration: 30,
+          status: 'completed'
+        },
+        {
+          id: '3',
+          title: 'Exploración de texturas',
+          executionDate: '2025-07-26',
+          studentCount: 22,
+          rating: 0,
+          duration: 0,
+          status: 'pending'
         }
-      })
-      
-      toast.success('Juego creado exitosamente')
-      router.push(`/teacher/game/${gameSession.session_id}/lobby`)
-    } catch (error) {
-      toast.error('Error al crear el juego')
-    }
+      ]);
+
+      setStudentProgress([
+        {
+          name: 'María González',
+          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face',
+          progress: 85,
+          lastActivity: 'Hace 2 horas',
+          achievements: 12
+        },
+        {
+          name: 'Carlos Rodríguez',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
+          progress: 92,
+          lastActivity: 'Hace 1 día',
+          achievements: 15
+        },
+        {
+          name: 'Ana Silva',
+          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
+          progress: 78,
+          lastActivity: 'Hace 3 días',
+          achievements: 10
+        }
+      ]);
+
+      setAchievements([
+        {
+          id: '1',
+          title: 'Primer Paso',
+          description: 'Completa tu primera actividad',
+          icon: '🎯',
+          unlocked: true,
+          progress: 1,
+          maxProgress: 1
+        },
+        {
+          id: '2',
+          title: 'Explorador',
+          description: 'Ejecuta 10 actividades diferentes',
+          icon: '🔍',
+          unlocked: false,
+          progress: 7,
+          maxProgress: 10
+        },
+        {
+          id: '3',
+          title: 'Maestro del Laboratorio',
+          description: 'Alcanza un rating promedio de 4.5+',
+          icon: '🏆',
+          unlocked: true,
+          progress: 4.8,
+          maxProgress: 4.5
+        }
+      ]);
+
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-300">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          {trend && (
+            <p className={`text-sm mt-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {trend > 0 ? '+' : ''}{trend}% vs semana anterior
+            </p>
+          )}
+        </div>
+        <div className={`p-3 rounded-lg ${color}`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const ActivityCard = ({ activity }: { activity: RecentActivity }) => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-300">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <h4 className="font-semibold text-gray-900 text-sm">{activity.title}</h4>
+          <p className="text-xs text-gray-500 mt-1">{activity.executionDate}</p>
+          <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+            <span className="flex items-center gap-1">
+              <UserGroupIcon className="h-3 w-3" />
+              {activity.studentCount} alumnos
+            </span>
+            {activity.rating > 0 && (
+              <span className="flex items-center gap-1">
+                <StarIcon className="h-3 w-3 text-yellow-500" />
+                {activity.rating}/5
+              </span>
+            )}
+            {activity.duration > 0 && (
+              <span className="flex items-center gap-1">
+                <ClockIcon className="h-3 w-3" />
+                {activity.duration} min
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="ml-4">
+          {activity.status === 'completed' && (
+            <CheckCircleIcon className="h-5 w-5 text-green-500" />
+          )}
+          {activity.status === 'pending' && (
+            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />
+          )}
+          {activity.status === 'in-progress' && (
+            <ClockIcon className="h-5 w-5 text-blue-500" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const StudentCard = ({ student }: { student: StudentProgress }) => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-300">
+      <div className="flex items-start space-x-3">
+        <img 
+          src={student.avatar} 
+          alt={student.name}
+          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-gray-900 text-sm truncate">{student.name}</h4>
+          <p className="text-xs text-gray-500 mb-2">{student.lastActivity}</p>
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>Progreso</span>
+              <span>{student.progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${student.progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <div className="flex items-center gap-1 text-xs text-gray-600">
+            <TrophyIcon className="h-3 w-3 text-yellow-500" />
+            {student.achievements}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const AchievementCard = ({ achievement }: { achievement: Achievement }) => (
+    <div className={`bg-white rounded-lg shadow-sm border border-gray-100 p-4 transition-all duration-300 ${
+      achievement.unlocked ? 'hover:shadow-md' : 'opacity-60'
+    }`}>
+      <div className="flex items-center space-x-3">
+        <div className={`text-2xl ${achievement.unlocked ? '' : 'grayscale'}`}>
+          {achievement.icon}
+        </div>
+        <div className="flex-1">
+          <h4 className={`font-semibold text-sm ${achievement.unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
+            {achievement.title}
+          </h4>
+          <p className="text-xs text-gray-500 mt-1">{achievement.description}</p>
+          {!achievement.unlocked && (
+            <div className="mt-2">
+              <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <span>Progreso</span>
+                <span>{achievement.progress}/{achievement.maxProgress}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full"
+                  style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        {achievement.unlocked && (
+          <CheckCircleIcon className="h-5 w-5 text-green-500" />
+        )}
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   return (
     <DashboardLayout>
-      <div className="section-spacing">
-        {/* Header - Mobile Optimized */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg p-mobile text-white mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="page-title text-white">
-                ¡Hola, {user?.first_name}! 👋
-              </h1>
-              <p className="page-subtitle text-white/90 mt-2">
-                Aquí tienes un resumen de tus clases y actividades
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                onClick={() => router.push('/teacher/quiz/create')}
-                className="btn-responsive bg-white text-emerald-600 hover:bg-gray-100"
-              >
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Crear Quiz
+      <div className="p-4 md:p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              ¡Bienvenido, {user?.first_name || 'Profesor'}! 👋
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Aquí tienes un resumen de tu actividad en el laboratorio móvil
+            </p>
+          </div>
+          <div className="mt-4 sm:mt-0">
+            <Link href="/teacher/labs/activities/create">
+              <Button variant="primary">
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Nueva Actividad
               </Button>
-              <Button
-                onClick={() => router.push('/teacher/evaluation-gamified/create')}
-                className="btn-responsive bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 font-semibold"
-              >
-                <SparklesIcon className="h-4 w-4 mr-2" />
-                🎮 Gamificada
-              </Button>
-              <Button
-                onClick={() => router.push('/teacher/game/create')}
-                className="btn-responsive bg-emerald-500 hover:bg-emerald-400 text-white border-0"
-              >
-                <PlayIcon className="h-4 w-4 mr-2" />
-                Iniciar Juego
-              </Button>
-            </div>
+            </Link>
           </div>
         </div>
 
-        {/* Stats Grid - Responsive */}
-        <StatsGrid stats={teacherStats} className="animate-fade-in" />
-
-        {/* Quick Actions - Mobile First Grid */}
-        <div className="card-responsive p-mobile">
-          <h2 className="page-title mb-4">🚀 Acciones Rápidas</h2>
-          <div className="grid-responsive-2 gap-mobile">
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                onClick={action.onClick}
-                className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 text-left group hover:shadow-md touch-manipulation"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className={`p-2 rounded-lg text-white group-hover:scale-110 transition-transform ${
-                    action.color === 'blue' ? 'bg-blue-500' :
-                    action.color === 'purple' ? 'bg-purple-500' :
-                    action.color === 'green' ? 'bg-green-500' :
-                    'bg-orange-500'
-                  }`}>
-                    {action.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-mobile-sm font-semibold text-gray-900">{action.label}</h3>
-                    <p className="text-mobile-xs text-gray-600 mt-1">{action.description}</p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StatCard
+            title="Actividades Totales"
+            value={stats.totalActivities}
+            icon={BookOpenIcon}
+            color="bg-gradient-to-r from-blue-500 to-blue-600"
+            trend={12}
+          />
+          <StatCard
+            title="Ejecuciones Esta Semana"
+            value={stats.thisWeekExecutions}
+            icon={BeakerIcon}
+            color="bg-gradient-to-r from-green-500 to-green-600"
+            trend={8}
+          />
+          <StatCard
+            title="Rating Promedio"
+            value={stats.averageRating.toFixed(1)}
+            icon={StarIcon}
+            color="bg-gradient-to-r from-yellow-500 to-yellow-600"
+          />
+          <StatCard
+            title="Total Estudiantes"
+            value={stats.totalStudents}
+            icon={UserGroupIcon}
+            color="bg-gradient-to-r from-purple-500 to-purple-600"
+            trend={5}
+          />
+          <StatCard
+            title="Ejecuciones Pendientes"
+            value={stats.pendingActivities}
+            icon={ClockIcon}
+            color="bg-gradient-to-r from-orange-500 to-orange-600"
+          />
+          <StatCard
+            title="Total Ejecuciones"
+            value={stats.totalExecutions}
+            icon={ChartBarIcon}
+            color="bg-gradient-to-r from-indigo-500 to-indigo-600"
+            trend={15}
+          />
         </div>
 
-        {/* Main Content - Two Column Layout for larger screens */}
-        <div className="grid-responsive-1 lg:grid-cols-3 gap-mobile">
-          {/* Left Column - Classes & Quizzes */}
-          <div className="lg:col-span-2 space-y-mobile">
-            {/* My Classes */}
-            <div className="card-responsive p-mobile">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-                <h2 className="page-title">📚 Mis Clases</h2>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/teacher/classes')}
-                  className="btn-responsive"
-                >
-                  Ver todas
-                </Button>
-              </div>
-              
-              {classesLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-16 bg-gray-200 rounded-lg"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : myClasses.length > 0 ? (
-                <div className="space-y-3">
-                  {myClasses.map((cls) => (
-                    <div key={cls.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-mobile-sm font-semibold text-gray-900 truncate">{cls.name}</h3>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1">
-                            <span className="text-mobile-xs text-gray-600">{cls.subject}</span>
-                            <span className="text-mobile-xs text-gray-600 flex items-center">
-                              <UsersIcon className="h-3 w-3 mr-1" />
-                              {cls.studentCount} estudiantes
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-mobile-xs text-gray-500">
-                            Próxima: {cls.nextClass.toLocaleDateString('es-CL')}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => router.push(`/teacher/classes/${cls.id}`)}
-                            className="btn-responsive"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <AcademicCapIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-mobile-sm font-medium text-gray-900 mb-2">No tienes clases aún</h3>
-                  <p className="text-mobile-xs text-gray-500 mb-4">Crea tu primera clase para comenzar</p>
-                  <Button
-                    onClick={() => router.push('/teacher/classes/create')}
-                    className="btn-responsive"
-                  >
-                    Crear Clase
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Actividades Recientes */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
+                  Actividades Recientes
+                </h2>
+                <Link href="/teacher/labs/activities">
+                  <Button variant="outline" size="sm">
+                    Ver Todas
                   </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Recent Quizzes */}
-            <div className="card-responsive p-mobile">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-                <h2 className="page-title">📝 Quizzes Recientes</h2>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/teacher/quiz')}
-                  className="btn-responsive"
-                >
-                  Ver todos
-                </Button>
+                </Link>
               </div>
-              
-              {quizzesLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="h-20 bg-gray-200 rounded-lg"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : recentQuizzes.length > 0 ? (
-                <div className="space-y-3">
-                  {recentQuizzes.map((quiz) => (
-                    <div key={quiz.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-mobile-sm font-semibold text-gray-900 truncate">{quiz.title}</h3>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1">
-                            <span className="text-mobile-xs text-gray-600">{quiz.subject}</span>
-                            <span className="text-mobile-xs text-gray-600">{quiz.questions} preguntas</span>
-                            <span className={`text-mobile-xs px-2 py-1 rounded-full ${
-                              quiz.mode === 'ai' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                            }`}>
-                              {quiz.mode === 'ai' ? 'IA' : 'Manual'}
-                            </span>
-                          </div>
-                          <p className="text-mobile-xs text-gray-500 mt-1">
-                            {quiz.plays} reproducciones • {formatDate(quiz.createdAt)}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => router.push(`/teacher/quiz/${quiz.id}`)}
-                            className="btn-responsive"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleStartGame(quiz.id)}
-                            className="btn-responsive"
-                          >
-                            <PlayIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-mobile-sm font-medium text-gray-900 mb-2">No tienes quizzes aún</h3>
-                  <p className="text-mobile-xs text-gray-500 mb-4">Crea tu primer quiz para comenzar</p>
-                  <Button
-                    onClick={() => router.push('/teacher/quiz/create')}
-                    className="btn-responsive"
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Crear Quiz
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column - Activity & Stats */}
-          <div className="space-y-mobile">
-            {/* Recent Activity */}
-            <div className="card-responsive p-mobile">
-              <h2 className="page-title mb-4">📊 Actividad Reciente</h2>
               <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <PlayIcon className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-mobile-sm text-gray-900">Juego de Matemáticas iniciado</p>
-                    <p className="text-mobile-xs text-gray-500">25 estudiantes participaron • Hace 2 horas</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <PlusIcon className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-mobile-sm text-gray-900">Quiz de Historia creado</p>
-                    <p className="text-mobile-xs text-gray-500">15 preguntas • Hace 4 horas</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <SparklesIcon className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-mobile-sm text-gray-900">Quiz generado con IA</p>
-                    <p className="text-mobile-xs text-gray-500">Ciencias Naturales • Hace 6 horas</p>
-                  </div>
-                </div>
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push('/teacher/activity')}
-                className="btn-responsive w-full mt-4"
-              >
-                Ver toda la actividad
-              </Button>
-            </div>
-
-            {/* Performance Summary */}
-            <div className="card-responsive p-mobile">
-              <h2 className="page-title mb-4">⚡ Resumen de Rendimiento</h2>
-              <div className="space-y-4">
-                <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                  <div className="text-mobile-xs text-blue-600 font-medium mb-1">Promedio de Participación</div>
-                  <div className="text-mobile-lg font-bold text-blue-800">87%</div>
-                  <div className="text-mobile-xs text-blue-600 mt-1">Esta semana</div>
-                </div>
-                
-                <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                  <div className="text-mobile-xs text-green-600 font-medium mb-1">Juegos Completados</div>
-                  <div className="text-mobile-lg font-bold text-green-800">24</div>
-                  <div className="text-mobile-xs text-green-600 mt-1">Este mes</div>
-                </div>
-                
-                <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                  <div className="text-mobile-xs text-purple-600 font-medium mb-1">Satisfacción</div>
-                  <div className="text-mobile-lg font-bold text-purple-800">4.8/5</div>
-                  <div className="text-mobile-xs text-purple-600 mt-1">Promedio</div>
-                </div>
+                {recentActivities.map((activity) => (
+                  <ActivityCard key={activity.id} activity={activity} />
+                ))}
               </div>
             </div>
 
-            {/* Time Selector */}
-            <div className="card-responsive p-mobile">
-              <h3 className="text-mobile-sm font-semibold text-gray-900 mb-3">Período de Análisis</h3>
-              <select 
-                value={selectedPeriod} 
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="input-field-mobile"
-              >
-                <option value="week">Esta Semana</option>
-                <option value="month">Este Mes</option>
-                <option value="quarter">Este Trimestre</option>
-                <option value="year">Este Año</option>
-              </select>
+            {/* Progreso de Estudiantes */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <AcademicCapIcon className="h-5 w-5 mr-2 text-green-600" />
+                  Progreso de Estudiantes
+                </h2>
+                <Button variant="outline" size="sm">
+                  Ver Detalles
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {studentProgress.map((student, index) => (
+                  <StudentCard key={index} student={student} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Logros */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
+                  Logros
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {achievements.filter(a => a.unlocked).length}/{achievements.length}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {achievements.map((achievement) => (
+                  <AchievementCard key={achievement.id} achievement={achievement} />
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
+                <LightBulbIcon className="h-5 w-5 mr-2 text-purple-600" />
+                Acciones Rápidas
+              </h2>
+              <div className="space-y-3">
+                <Link href="/teacher/labs/activities/create">
+                  <Button variant="outline" className="w-full justify-start">
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Crear Actividad
+                  </Button>
+                </Link>
+                <Link href="/teacher/labs/activities">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BookOpenIcon className="h-4 w-4 mr-2" />
+                    Explorar Catálogo
+                  </Button>
+                </Link>
+                <Link href="/teacher/oa1-games">
+                  <Button variant="outline" className="w-full justify-start">
+                    <BeakerIcon className="h-4 w-4 mr-2" />
+                    Evaluación Gamificada
+                  </Button>
+                </Link>
+                <Link href="/help">
+                  <Button variant="outline" className="w-full justify-start">
+                    <LightBulbIcon className="h-4 w-4 mr-2" />
+                    Centro de Ayuda
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 } 

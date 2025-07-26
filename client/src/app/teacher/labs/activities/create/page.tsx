@@ -12,14 +12,25 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 interface Material { id: number; name: string; }
 
-const FieldGroup = ({ label, children }) => (
+interface FieldGroupProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+interface SectionCardProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const FieldGroup = ({ label, children }: FieldGroupProps) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     {children}
   </div>
 );
 
-const SectionCard = ({ title, icon, children }) => (
+const SectionCard = ({ title, icon, children }: SectionCardProps) => (
   <div className="bg-white p-6 rounded-lg shadow">
     <h2 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center">
       {icon}
@@ -78,9 +89,9 @@ export default function TeacherNewActivityPage() {
     const { name, value } = e.target;
     if (name === 'title') {
       const slug = value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      setFormData(prev => ({ ...prev, title: value, slug: slug }));
+      setFormData((prev: any) => ({ ...prev, title: value, slug: slug }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev: any) => ({ ...prev, [name]: value }));
     }
   };
 

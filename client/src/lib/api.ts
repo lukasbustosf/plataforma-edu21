@@ -615,6 +615,19 @@ class ApiService {
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return this.request('GET', '/health')
   }
+
+  // Lab Activities methods
+  async getLabActivity(id: string): Promise<any> {
+    return this.request('GET', `/lab/activities/id/${id}`)
+  }
+
+  async getLabMaterials(): Promise<any> {
+    return this.request('GET', '/lab/materials')
+  }
+
+  async updateLabActivity(id: string, data: any): Promise<any> {
+    return this.request('PUT', `/lab/activities/${id}`, data)
+  }
 }
 
 // Create and export a singleton instance

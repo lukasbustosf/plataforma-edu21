@@ -1,8 +1,15 @@
-feat: Implementación inicial de nuevos juegos, funcionalidades y corrección de errores
+feat(lab): Implementar registro de ejecución y estabilizar base de datos
 
-- **Juegos:** Se subieron los primeros 6 juegos de matemática para primer básico.
-- **Reportes:** Se añadió una nueva vista de reporte.
-- **Funcionalidades:** Se implementaron nuevas funcionalidades como el banco de preguntas, entre otras.
-- **Correcciones:** Se resolvieron errores de tipado en el cliente, incluyendo el problema persistente con PDFDownloadLink.
-- **Actualizaciones:** Se actualizaron dependencias y archivos de configuración (package.json, pnpm-lock.yaml, tsconfig.json).
-- **Infraestructura:** Se incluyeron nuevos scripts y archivos de base de datos relacionados con la gestión de preguntas y evaluaciones.
+Se soluciona un problema crítico de desincronización entre el esquema de la base de datos de Supabase y el ORM Prisma, que causaba errores 500 en el servidor.
+
+Se establece un flujo de trabajo de migración y seeding robusto:
+- Creación de un script SQL maestro para el esquema 'public'.
+- Establecimiento de un historial de migración base limpio con Prisma.
+- Población de la base de datos con datos de prueba (`db seed`).
+
+Se implementa la funcionalidad para registrar la ejecución de una actividad de laboratorio:
+- Endpoint `POST /api/lab/activity-logs` que utiliza una transacción para registrar la ejecución y actualizar las métricas de la actividad.
+- Componente de React `LogExecutionModal` para la interfaz de usuario.
+- Integración del modal en la página de detalles de la actividad.
+
+Se añade documentación técnica y una guía sobre el uso de Prisma con Supabase para consolidar el conocimiento del proyecto.

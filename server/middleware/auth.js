@@ -13,13 +13,45 @@ async function authenticateToken(req, res, next) {
       // Extract role from token if it's a demo token
       let userRole = 'TEACHER'; // default
       if (token && token.startsWith('demo-token-')) {
-        if (token.includes('bienestar')) userRole = 'BIENESTAR_ESCOLAR';
-        else if (token.includes('admin')) userRole = 'ADMIN_ESCOLAR';
-        else if (token.includes('student')) userRole = 'STUDENT';
-        else if (token.includes('teacher')) userRole = 'TEACHER';
+        console.log('🔍 DEBUG: Token recibido:', token);
+        console.log('🔍 DEBUG: Token incluye "superadmin"?', token.includes('superadmin'));
+        console.log('🔍 DEBUG: Token incluye "teacher"?', token.includes('teacher'));
+        
+        if (token.includes('superadmin')) {
+          userRole = 'SUPER_ADMIN_FULL';
+          console.log('✅ DEBUG: Rol detectado como SUPER_ADMIN_FULL');
+        }
+        else if (token.includes('bienestar')) {
+          userRole = 'BIENESTAR_ESCOLAR';
+          console.log('✅ DEBUG: Rol detectado como BIENESTAR_ESCOLAR');
+        }
+        else if (token.includes('admin')) {
+          userRole = 'ADMIN_ESCOLAR';
+          console.log('✅ DEBUG: Rol detectado como ADMIN_ESCOLAR');
+        }
+        else if (token.includes('student')) {
+          userRole = 'STUDENT';
+          console.log('✅ DEBUG: Rol detectado como STUDENT');
+        }
+        else if (token.includes('teacher')) {
+          userRole = 'TEACHER';
+          console.log('✅ DEBUG: Rol detectado como TEACHER');
+        }
+        else {
+          console.log('⚠️ DEBUG: No se detectó ningún rol específico, usando TEACHER por defecto');
+        }
+        console.log('🔍 DEBUG: Rol final asignado:', userRole);
       }
       
       const hardcodedUsers = {
+        'SUPER_ADMIN_FULL': {
+          user_id: '550e8400-e29b-41d4-a716-446655440005',
+          school_id: '550e8400-e29b-41d4-a716-446655440000',
+          email: 'superadmin@demo.edu21.cl',
+          first_name: 'Super',
+          last_name: 'Administrador',
+          role: 'SUPER_ADMIN_FULL'
+        },
         'TEACHER': {
           user_id: '550e8400-e29b-41d4-a716-446655440001',
           school_id: '550e8400-e29b-41d4-a716-446655440000',

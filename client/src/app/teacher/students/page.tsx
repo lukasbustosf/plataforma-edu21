@@ -72,7 +72,7 @@ export default function TeacherStudentsPage() {
 
   // Fetch classes
   const { data: classesData } = useQuery(
-    'teacher-classes',
+    ['teacher-classes'],
     () => api.getClasses(),
     { enabled: !!user?.user_id }
   )

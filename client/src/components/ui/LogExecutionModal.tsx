@@ -7,14 +7,23 @@ import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
 
-export function LogExecutionModal({ open, onClose, activityId, onSuccess }) {
+interface LogExecutionModalProps {
+  open: boolean;
+  onClose: () => void;
+  activityId: string;
+  onSuccess: () => void;
+}
+
+export function LogExecutionModal({ open, onClose, activityId, onSuccess }: LogExecutionModalProps) {
   const [formData, setFormData] = useState({
     execution_date: new Date().toISOString().split('T')[0],
     student_count: '',
     notes: '',
-    course_id: ''
+    course_id: '',
+    duration_actual_minutes: '',
+    success_rating: '',
   });
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
@@ -27,11 +36,11 @@ export function LogExecutionModal({ open, onClose, activityId, onSuccess }) {
     ]);
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setEvidenceFile(e.target.files[0]);
     } else {
@@ -39,16 +48,16 @@ export function LogExecutionModal({ open, onClose, activityId, onSuccess }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      let body;
+      let body: FormData | string;
       let headers = {};
       if (evidenceFile) {
         body = new FormData();
-        Object.entries(formData).forEach(([key, value]) => body.append(key, value));
+        Object.entries(formData).forEach(([key, value]) => (body as FormData).append(key, value));
         body.append('activity_id', activityId);
         body.append('evidence', evidenceFile);
       } else {
@@ -65,7 +74,7 @@ export function LogExecutionModal({ open, onClose, activityId, onSuccess }) {
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -120,6 +129,28 @@ export function LogExecutionModal({ open, onClose, activityId, onSuccess }) {
                   <div>
                     <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notas / Observaciones (Opcional)</label>
                     <Textarea name="notes" id="notes" rows={4} value={formData.notes} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label htmlFor="duration_actual_minutes" className="block text-sm font-medium text-gray-700">Duración Real (minutos)</label>
+                    <Input type="number" name="duration_actual_minutes" id="duration_actual_minutes" placeholder="Ej: 45" value={formData.duration_actual_minutes} onChange={handleChange} required />
+                  </div>
+                  <div>
+                    <label htmlFor="success_rating" className="block text-sm font-medium text-gray-700">Valoración de la Actividad</label>
+                    <select
+                      name="success_rating"
+                      id="success_rating"
+                      value={formData.success_rating}
+                      onChange={handleChange}
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-base"
+                    >
+                      <option value="">Selecciona una valoración</option>
+                      <option value="1">★☆☆☆☆ (1)</option>
+                      <option value="2">★★☆☆☆ (2)</option>
+                      <option value="3">★★★☆☆ (3)</option>
+                      <option value="4">★★★★☆ (4)</option>
+                      <option value="5">★★★★★ (5)</option>
+                    </select>
                   </div>
                   <div>
                     <label htmlFor="evidence" className="block text-sm font-medium text-gray-700">Evidencia (imagen o PDF, opcional)</label>

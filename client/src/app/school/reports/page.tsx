@@ -1,620 +1,410 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuth } from '@/store/auth'
-import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
+import React, { useState } from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import LabReports from '@/components/reports/LabReports';
+import GameReports from '@/components/reports/GameReports';
 import { 
+  BeakerIcon, 
+  PlayIcon, 
   DocumentArrowDownIcon,
-  ChartBarIcon,
-  PrinterIcon,
   CalendarIcon,
-  FunnelIcon,
+  ChartBarIcon,
+  BuildingOfficeIcon,
+  UsersIcon,
   AcademicCapIcon,
-  BookOpenIcon,
-  ClockIcon,
   TrophyIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-  EyeIcon
-} from '@heroicons/react/24/outline'
-import toast from 'react-hot-toast'
-
-interface OAReport {
-  oa_code: string
-  oa_description: string
-  subject: string
-  grade: string
-  coverage_percentage: number
-  student_count: number
-  avg_score: number
-  bloom_level: string
-  status: 'completed' | 'in_progress' | 'not_started'
-  last_evaluated: string
-}
-
-interface BloomAnalysis {
-  level: string
-  percentage: number
-  student_count: number
-  avg_score: number
-  questions_count: number
-}
+  ClockIcon
+} from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/Button';
 
 export default function SchoolReportsPage() {
-  const { user } = useAuth()
-  const [selectedPeriod, setSelectedPeriod] = useState('semester')
-  const [selectedGrade, setSelectedGrade] = useState('ALL')
-  const [selectedSubject, setSelectedSubject] = useState('ALL')
-  const [selectedReport, setSelectedReport] = useState('oa_coverage')
-  const [dateRange, setDateRange] = useState({
-    start: '2024-08-01',
-    end: '2024-12-20'
-  })
+  const [activeTab, setActiveTab] = useState<'lab' | 'games' | 'academic'>('lab');
 
-  // Mock data for OA coverage
-  const mockOAReports: OAReport[] = [
-    {
-      oa_code: 'MAT-8B-OA01',
-      oa_description: 'Resolver problemas de proporcionalidad directa e inversa',
-      subject: 'Matemáticas',
-      grade: '8° Básico',
-      coverage_percentage: 85,
-      student_count: 32,
-      avg_score: 78.5,
-      bloom_level: 'Aplicar',
-      status: 'completed',
-      last_evaluated: '2024-06-15'
+  // Datos simulados para Laboratorios (vista Admin Escolar)
+  const labData = {
+    executionsByMonth: [
+      { month: 'Ene', executions: 23, students: 89, rating: 4.4 },
+      { month: 'Feb', executions: 34, students: 123, rating: 4.6 },
+      { month: 'Mar', executions: 28, students: 98, rating: 4.3 },
+      { month: 'Abr', executions: 41, students: 145, rating: 4.7 },
+      { month: 'May', executions: 35, students: 128, rating: 4.5 },
+      { month: 'Jun', executions: 48, students: 167, rating: 4.8 },
+    ],
+    topActivities: [
+      { name: 'El hábitat de los animales', executions: 15, rating: 4.8, students: 52 },
+      { name: 'Conteo con material concreto', executions: 12, rating: 4.5, students: 45 },
+      { name: 'Exploración de texturas', executions: 10, rating: 4.7, students: 38 },
+      { name: 'Clasificación de objetos', executions: 8, rating: 4.3, students: 32 },
+      { name: 'Experimentos con agua', executions: 7, rating: 4.6, students: 28 },
+    ],
+    materialUsage: [
+      { material: 'PUZZLE ANIMALES', usage: 15, percentage: 28 },
+      { material: 'BLOQUES MATEMÁTICOS', usage: 12, percentage: 22 },
+      { material: 'KIT TEXTURAS', usage: 10, percentage: 19 },
+      { material: 'MATERIALES DE LABORATORIO', usage: 8, percentage: 15 },
+      { material: 'OTROS MATERIALES', usage: 8, percentage: 16 },
+    ],
+    teacherMetrics: [
+      { teacher: 'María González', activities: 6, executions: 18, students: 67, rating: 4.6 },
+      { teacher: 'Carlos Rodríguez', activities: 4, executions: 12, students: 45, rating: 4.4 },
+      { teacher: 'Ana Silva', activities: 5, executions: 15, students: 52, rating: 4.7 },
+      { teacher: 'Luis Pérez', activities: 3, executions: 9, students: 34, rating: 4.3 },
+    ],
+    weeklyProgress: [
+      { week: 'Sem 1', executions: 8, newStudents: 32, avgRating: 4.4 },
+      { week: 'Sem 2', executions: 12, newStudents: 45, avgRating: 4.6 },
+      { week: 'Sem 3', executions: 10, newStudents: 38, avgRating: 4.3 },
+      { week: 'Sem 4', executions: 15, newStudents: 52, avgRating: 4.7 },
+    ],
+    summary: {
+      totalActivities: 18,
+      totalExecutions: 52,
+      totalStudents: 209,
+      averageRating: 4.6,
+      totalEvidence: 35,
+      activeTeachers: 4,
     },
-    {
-      oa_code: 'LEN-7B-OA03',
-      oa_description: 'Analizar narraciones considerando el narrador y contexto',
-      subject: 'Lenguaje',
-      grade: '7° Básico',
-      coverage_percentage: 92,
-      student_count: 28,
-      avg_score: 82.1,
-      bloom_level: 'Analizar',
-      status: 'completed',
-      last_evaluated: '2024-06-18'
+  };
+
+  // Datos simulados para Juegos (vista Admin Escolar)
+  const gameData = {
+    gameUsageByMonth: [
+      { month: 'Ene', totalGames: 23, uniquePlayers: 15, averageScore: 77 },
+      { month: 'Feb', totalGames: 34, uniquePlayers: 22, averageScore: 80 },
+      { month: 'Mar', totalGames: 28, uniquePlayers: 18, averageScore: 78 },
+      { month: 'Abr', totalGames: 41, uniquePlayers: 26, averageScore: 83 },
+      { month: 'May', totalGames: 35, uniquePlayers: 23, averageScore: 81 },
+      { month: 'Jun', totalGames: 48, uniquePlayers: 31, averageScore: 85 },
+    ],
+    topGames: [
+      { name: 'Recordar: Conteo Básico', usageCount: 18, averageScore: 85, completionRate: 92, bloomLevel: 'Recordar' },
+      { name: 'Comprender: Agrupación', usageCount: 15, averageScore: 78, completionRate: 88, bloomLevel: 'Comprender' },
+      { name: 'Aplicar: La Feria', usageCount: 12, averageScore: 82, completionRate: 85, bloomLevel: 'Aplicar' },
+      { name: 'Analizar: Patrones', usageCount: 10, averageScore: 75, completionRate: 80, bloomLevel: 'Analizar' },
+      { name: 'Evaluar: Comparaciones', usageCount: 8, averageScore: 79, completionRate: 83, bloomLevel: 'Evaluar' },
+    ],
+    bloomDistribution: [
+      { level: 'Recordar', usage: 18, averageScore: 85, percentage: 29 },
+      { level: 'Comprender', usage: 15, averageScore: 78, percentage: 24 },
+      { level: 'Aplicar', usage: 12, averageScore: 82, percentage: 19 },
+      { level: 'Analizar', usage: 10, averageScore: 75, percentage: 16 },
+      { level: 'Evaluar', usage: 8, averageScore: 79, percentage: 12 },
+    ],
+    studentProgress: [
+      { student: 'María González', gamesPlayed: 12, averageScore: 82, achievements: 6, timeSpent: 85 },
+      { student: 'Carlos Rodríguez', gamesPlayed: 10, averageScore: 78, achievements: 5, timeSpent: 72 },
+      { student: 'Ana Silva', gamesPlayed: 15, averageScore: 85, achievements: 8, timeSpent: 95 },
+      { student: 'Luis Pérez', gamesPlayed: 8, averageScore: 75, achievements: 3, timeSpent: 60 },
+    ],
+    difficultyAnalysis: [
+      { complexity: 'Básico', gamesCount: 2, averageScore: 85, completionRate: 92 },
+      { complexity: 'Intermedio', gamesCount: 2, averageScore: 78, completionRate: 85 },
+      { complexity: 'Avanzado', gamesCount: 2, averageScore: 72, completionRate: 78 },
+    ],
+    summary: {
+      totalGames: 6,
+      totalPlays: 63,
+      uniquePlayers: 31,
+      averageScore: 82,
+      totalAchievements: 22,
+      averageTimePerGame: 8,
     },
-    {
-      oa_code: 'CN-6B-OA05',
-      oa_description: 'Explicar los efectos de la actividad humana en el medio ambiente',
-      subject: 'Ciencias Naturales',
-      grade: '6° Básico',
-      coverage_percentage: 67,
-      student_count: 30,
-      avg_score: 74.3,
-      bloom_level: 'Comprender',
-      status: 'in_progress',
-      last_evaluated: '2024-06-10'
+  };
+
+  // Datos simulados para Reportes Académicos
+  const academicData = {
+    summary: {
+      totalStudents: 450,
+      totalTeachers: 25,
+      totalClasses: 18,
+      averageGrade: 6.2,
+      attendanceRate: 94.5,
+      completionRate: 87.3,
     },
-    {
-      oa_code: 'HIS-1M-OA02',
-      oa_description: 'Analizar procesos de independencia en América',
-      subject: 'Historia',
-      grade: '1° Medio',
-      coverage_percentage: 45,
-      student_count: 35,
-      avg_score: 71.8,
-      bloom_level: 'Evaluar',
-      status: 'in_progress',
-      last_evaluated: '2024-06-05'
-    },
-    {
-      oa_code: 'FIS-2M-OA04',
-      oa_description: 'Comprender conceptos de mecánica y movimiento',
-      subject: 'Física',
-      grade: '2° Medio',
-      coverage_percentage: 0,
-      student_count: 26,
-      avg_score: 0,
-      bloom_level: 'Recordar',
-      status: 'not_started',
-      last_evaluated: 'N/A'
-    }
-  ]
+    classPerformance: [
+      { class: '1° Básico A', students: 25, averageGrade: 6.5, attendance: 96.2, teacher: 'María González' },
+      { class: '1° Básico B', students: 24, averageGrade: 6.3, attendance: 95.8, teacher: 'Carlos Rodríguez' },
+      { class: '2° Básico A', students: 26, averageGrade: 6.1, attendance: 94.5, teacher: 'Ana Silva' },
+      { class: '2° Básico B', students: 25, averageGrade: 6.4, attendance: 95.1, teacher: 'Luis Pérez' },
+      { class: '3° Básico A', students: 27, averageGrade: 6.0, attendance: 93.8, teacher: 'Patricia López' },
+    ],
+    subjectPerformance: [
+      { subject: 'Matemáticas', averageGrade: 6.3, completionRate: 89.2, students: 450 },
+      { subject: 'Lenguaje', averageGrade: 6.5, completionRate: 91.5, students: 450 },
+      { subject: 'Ciencias', averageGrade: 6.1, completionRate: 85.7, students: 450 },
+      { subject: 'Historia', averageGrade: 6.4, completionRate: 88.9, students: 450 },
+      { subject: 'Arte', averageGrade: 6.7, completionRate: 92.1, students: 450 },
+    ],
+    teacherPerformance: [
+      { teacher: 'María González', classes: 2, students: 49, averageGrade: 6.5, attendance: 96.0 },
+      { teacher: 'Carlos Rodríguez', classes: 2, students: 48, averageGrade: 6.3, attendance: 95.5 },
+      { teacher: 'Ana Silva', classes: 2, students: 51, averageGrade: 6.1, attendance: 94.2 },
+      { teacher: 'Luis Pérez', classes: 2, students: 50, averageGrade: 6.4, attendance: 95.0 },
+    ],
+  };
 
-  // Mock data for Bloom analysis
-  const mockBloomAnalysis: BloomAnalysis[] = [
-    { level: 'Recordar', percentage: 15, student_count: 680, avg_score: 78.2, questions_count: 245 },
-    { level: 'Comprender', percentage: 25, student_count: 680, avg_score: 75.8, questions_count: 410 },
-    { level: 'Aplicar', percentage: 30, student_count: 680, avg_score: 73.5, questions_count: 492 },
-    { level: 'Analizar', percentage: 20, student_count: 680, avg_score: 71.2, questions_count: 328 },
-    { level: 'Evaluar', percentage: 7, student_count: 680, avg_score: 68.9, questions_count: 115 },
-    { level: 'Crear', percentage: 3, student_count: 680, avg_score: 65.4, questions_count: 49 }
-  ]
-
-  const grades = ['ALL', '5° Básico', '6° Básico', '7° Básico', '8° Básico', '1° Medio', '2° Medio', '3° Medio', '4° Medio']
-  const subjects = ['ALL', 'Matemáticas', 'Lenguaje', 'Ciencias Naturales', 'Historia', 'Física', 'Química', 'Biología', 'Inglés']
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800'
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800'
-      case 'not_started': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircleIcon className="h-4 w-4" />
-      case 'in_progress': return <ClockIcon className="h-4 w-4" />
-      case 'not_started': return <ExclamationTriangleIcon className="h-4 w-4" />
-      default: return <ClockIcon className="h-4 w-4" />
-    }
-  }
-
-  const getCoverageColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600'
-    if (percentage >= 60) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600'
-    if (score >= 70) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const filteredOAReports = mockOAReports.filter(report => {
-    const matchesGrade = selectedGrade === 'ALL' || report.grade === selectedGrade
-    const matchesSubject = selectedSubject === 'ALL' || report.subject === selectedSubject
-    return matchesGrade && matchesSubject
-  })
-
-  const handleExportReport = (format: 'pdf' | 'csv' | 'excel') => {
-    toast.success(`Exportando reporte en formato ${format.toUpperCase()}...`)
-    // In real app: trigger file download with proper filename
-  }
-
-  const handlePrintReport = () => {
-    toast.success('Enviando a impresora...')
-    // In real app: trigger print dialog
-  }
-
-  const handleGenerateCustomReport = () => {
-    toast.success('Generando reporte personalizado...')
-    // In real app: show custom report builder modal
-  }
-
-  const handleViewOADetail = (oaCode: string) => {
-    toast.success(`Abriendo detalles de OA: ${oaCode}`)
-    // In real app: navigate to OA detail view
-  }
-
-  const handleMarkOAAsCompleted = (oaCode: string) => {
-    const oa = filteredOAReports.find(r => r.oa_code === oaCode)
-    if (oa) {
-      oa.status = 'completed'
-      oa.coverage_percentage = 100
-      toast.success(`OA ${oaCode} marcado como completado`)
-    }
-  }
-
-  // Calculate statistics
-  const totalOAs = filteredOAReports.length
-  const completedOAs = filteredOAReports.filter(r => r.status === 'completed').length
-  const avgCoverage = filteredOAReports.reduce((sum, r) => sum + r.coverage_percentage, 0) / totalOAs || 0
-  const avgScore = filteredOAReports.filter(r => r.avg_score > 0).reduce((sum, r) => sum + r.avg_score, 0) / filteredOAReports.filter(r => r.avg_score > 0).length || 0
+  const handleExportReport = () => {
+    const reportData = activeTab === 'lab' ? labData : activeTab === 'games' ? gameData : academicData;
+    const reportName = activeTab === 'lab' ? 'Reporte_Laboratorios_Escolar' : 
+                      activeTab === 'games' ? 'Reporte_Juegos_Escolar' : 'Reporte_Academico_Escolar';
+    
+    const dataStr = JSON.stringify(reportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${reportName}_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-4 md:p-6 space-y-6">
         {/* Header */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Reportes Académicos 📊</h1>
-                <p className="text-gray-600 mt-1">
-                  Análisis curricular con cobertura OA y distribución Bloom
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                <Button
-                  onClick={() => handleExportReport('pdf')}
-                  variant="outline"
-                >
-                  <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-                  Exportar PDF
-                </Button>
-                <Button
-                  onClick={handlePrintReport}
-                  variant="outline"
-                >
-                  <PrinterIcon className="h-5 w-5 mr-2" />
-                  Imprimir
-                </Button>
-              </div>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Reportes Administrativos Escolares 📊
+            </h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Análisis completo del rendimiento académico y uso de recursos educativos
+            </p>
           </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-gray-50">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{totalOAs}</div>
-              <div className="text-sm text-gray-600">OAs Evaluados</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{completedOAs}</div>
-              <div className="text-sm text-gray-600">OAs Completados</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-2xl font-bold ${getCoverageColor(avgCoverage)}`}>
-                {avgCoverage.toFixed(1)}%
-              </div>
-              <div className="text-sm text-gray-600">Cobertura Promedio</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-2xl font-bold ${getScoreColor(avgScore)}`}>
-                {avgScore.toFixed(1)}
-              </div>
-              <div className="text-sm text-gray-600">Nota Promedio</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Controls */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de reporte
-              </label>
-              <select
-                value={selectedReport}
-                onChange={(e) => setSelectedReport(e.target.value)}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              >
-                <option value="oa_coverage">Cobertura OA</option>
-                <option value="bloom_analysis">Análisis Bloom</option>
-                <option value="performance_trends">Tendencias de Rendimiento</option>
-                <option value="attendance_correlation">Correlación Asistencia</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Período
-              </label>
-              <select
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              >
-                <option value="semester">Semestre Actual</option>
-                <option value="month">Último Mes</option>
-                <option value="quarter">Último Trimestre</option>
-                <option value="year">Año Completo</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Grado
-              </label>
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              >
-                {grades.map(grade => (
-                  <option key={grade} value={grade}>
-                    {grade === 'ALL' ? 'Todos los grados' : grade}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Materia
-              </label>
-              <select
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              >
-                {subjects.map(subject => (
-                  <option key={subject} value={subject}>
-                    {subject === 'ALL' ? 'Todas las materias' : subject}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha inicio
-              </label>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha fin
-              </label>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex space-x-3">
-              <Button
-                onClick={() => handleExportReport('csv')}
-                variant="outline"
-                size="sm"
-              >
-                <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
-                CSV
-              </Button>
-              <Button
-                onClick={() => handleExportReport('excel')}
-                variant="outline"
-                size="sm"
-              >
-                <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
-                Excel
-              </Button>
-            </div>
-            <Button
-              onClick={handleGenerateCustomReport}
-              className="bg-blue-600 hover:bg-blue-700"
-              size="sm"
-            >
-              <ChartBarIcon className="h-4 w-4 mr-1" />
-              Generar Reporte
+          <div className="mt-4 sm:mt-0 flex gap-2">
+            <Button variant="outline">
+              <CalendarIcon className="h-5 w-5 mr-2" />
+              Seleccionar Período
+            </Button>
+            <Button variant="outline" onClick={handleExportReport}>
+              <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+              Exportar Reporte
             </Button>
           </div>
         </div>
 
-        {/* Main Report Content */}
-        {selectedReport === 'oa_coverage' && (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Cobertura de Objetivos de Aprendizaje (OA)</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Estado de cobertura curricular por OA según MINEDUC
-              </p>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Código OA
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Descripción
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Materia/Grado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cobertura
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Rendimiento
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nivel Bloom
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOAReports.map((report) => (
-                    <tr key={report.oa_code} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{report.oa_code}</div>
-                        <div className="text-xs text-gray-500">
-                          {report.student_count} estudiantes
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 max-w-xs">
-                          {report.oa_description}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{report.subject}</div>
-                        <div className="text-sm text-gray-500">{report.grade}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-1">
-                            <div className={`text-sm font-medium ${getCoverageColor(report.coverage_percentage)}`}>
-                              {report.coverage_percentage}%
-                            </div>
-                            <div className="mt-1 bg-gray-200 rounded-full h-2 w-20">
-                              <div 
-                                className={`h-2 rounded-full ${report.coverage_percentage >= 80 ? 'bg-green-500' : report.coverage_percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                                style={{ width: `${report.coverage_percentage}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`text-sm font-medium ${getScoreColor(report.avg_score)}`}>
-                          {report.avg_score > 0 ? report.avg_score.toFixed(1) : 'N/A'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {report.bloom_level}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                          {getStatusIcon(report.status)}
-                          <span className="ml-1">
-                            {report.status === 'completed' && 'Completado'}
-                            {report.status === 'in_progress' && 'En progreso'}
-                            {report.status === 'not_started' && 'No iniciado'}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => toast.success(`Viendo detalle de ${report.oa_code}`)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                          title="Ver detalle"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredOAReports.length === 0 && (
-              <div className="text-center py-12">
-                <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron datos</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Intenta ajustar los filtros para ver los reportes.
-                </p>
+        {/* Resumen Ejecutivo */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Total Estudiantes</p>
+                <p className="text-2xl font-bold">{academicData.summary.totalStudents}</p>
               </div>
-            )}
+              <UsersIcon className="h-8 w-8 text-blue-200" />
+            </div>
           </div>
-        )}
-
-        {selectedReport === 'bloom_analysis' && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">Análisis de Taxonomía de Bloom</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Distribución de preguntas y rendimiento por nivel cognitivo
-              </p>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockBloomAnalysis.map((analysis, index) => (
-                  <div key={analysis.level} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          index < 2 ? 'bg-green-100 text-green-600' :
-                          index < 4 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'
-                        }`}>
-                          <TrophyIcon className="h-5 w-5" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900">{analysis.level}</h3>
-                      </div>
-                      <span className="text-2xl font-bold text-indigo-600">{analysis.percentage}%</span>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Promedio de notas:</span>
-                        <span className={`font-semibold ${getScoreColor(analysis.avg_score)}`}>
-                          {analysis.avg_score.toFixed(1)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Preguntas evaluadas:</span>
-                        <span className="font-semibold text-gray-900">{analysis.questions_count}</span>
-                      </div>
-                      
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-indigo-600 h-2 rounded-full"
-                          style={{ width: `${analysis.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">Profesores Activos</p>
+                <p className="text-2xl font-bold">{academicData.summary.totalTeachers}</p>
               </div>
+              <AcademicCapIcon className="h-8 w-8 text-green-200" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">Promedio General</p>
+                <p className="text-2xl font-bold">{academicData.summary.averageGrade}</p>
+              </div>
+              <TrophyIcon className="h-8 w-8 text-purple-200" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-100 text-sm">Asistencia</p>
+                <p className="text-2xl font-bold">{academicData.summary.attendanceRate}%</p>
+              </div>
+              <ClockIcon className="h-8 w-8 text-yellow-200" />
+            </div>
+          </div>
+        </div>
 
-              <div className="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <ExclamationTriangleIcon className="h-5 w-5 text-amber-500 mt-0.5" />
+        {/* Tabs de Navegación */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
+          <div className="flex space-x-1">
+            <button
+              onClick={() => setActiveTab('lab')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'lab'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <BeakerIcon className="h-5 w-5 mr-2" />
+              Laboratorios Móviles
+            </button>
+            <button
+              onClick={() => setActiveTab('games')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'games'
+                  ? 'bg-purple-100 text-purple-700'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <PlayIcon className="h-5 w-5 mr-2" />
+              Evaluación Gamificada
+            </button>
+            <button
+              onClick={() => setActiveTab('academic')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'academic'
+                  ? 'bg-green-100 text-green-700'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <AcademicCapIcon className="h-5 w-5 mr-2" />
+              Reportes Académicos
+            </button>
+          </div>
+        </div>
+
+        {/* Contenido del Reporte */}
+        <div className="bg-gray-50 rounded-xl p-6">
+          {activeTab === 'lab' ? (
+            <LabReports 
+              data={labData} 
+              userRole="ADMIN" 
+            />
+          ) : activeTab === 'games' ? (
+            <GameReports 
+              data={gameData} 
+              userRole="ADMIN" 
+            />
+          ) : (
+            <div className="space-y-8">
+              {/* Header del Reporte Académico */}
+              <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-amber-800">Recomendaciones Pedagógicas</h4>
-                    <ul className="mt-2 text-sm text-amber-700 space-y-1">
-                      <li>• Aumentar preguntas de nivel "Evaluar" y "Crear" para desarrollar pensamiento crítico</li>
-                      <li>• Reforzar niveles básicos si el rendimiento en "Recordar" es bajo</li>
-                      <li>• Equilibrar la distribución para alinear con objetivos curriculares</li>
-                    </ul>
+                    <h1 className="text-2xl font-bold">Reporte Académico Escolar</h1>
+                    <p className="text-green-100 mt-1">
+                      Análisis completo del rendimiento académico del establecimiento
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-green-100 text-sm">Generado el {new Date().toLocaleDateString()}</p>
+                    <p className="text-green-100 text-sm">Vista Administrador Escolar</p>
                   </div>
                 </div>
               </div>
+
+              {/* Métricas Académicas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Clases</p>
+                      <p className="text-2xl font-bold text-gray-900">{academicData.summary.totalClasses}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600">
+                      <AcademicCapIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Promedio General</p>
+                      <p className="text-2xl font-bold text-gray-900">{academicData.summary.averageGrade}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
+                      <TrophyIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Tasa de Asistencia</p>
+                      <p className="text-2xl font-bold text-gray-900">{academicData.summary.attendanceRate}%</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600">
+                      <ClockIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rendimiento por Clase */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <AcademicCapIcon className="h-5 w-5 mr-2 text-blue-600" />
+                  Rendimiento por Clase
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Clase
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estudiantes
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Promedio
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Asistencia
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Profesor
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {academicData.classPerformance.map((classData, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {classData.class}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {classData.students}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {classData.averageGrade}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {classData.attendance}%
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {classData.teacher}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Rendimiento por Asignatura */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <TrophyIcon className="h-5 w-5 mr-2 text-green-600" />
+                  Rendimiento por Asignatura
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {academicData.subjectPerformance.map((subject, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-2">{subject.subject}</h4>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p>Promedio: {subject.averageGrade}</p>
+                        <p>Completación: {subject.completionRate}%</p>
+                        <p>Estudiantes: {subject.students}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Export and Actions */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Acciones de Reporte</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => handleExportReport('pdf')}
-              variant="outline"
-              className="w-full"
-            >
-              <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-              Descargar PDF Completo
-            </Button>
-            
-            <Button
-              onClick={() => toast.success('Programando reporte automático...')}
-              variant="outline"
-              className="w-full"
-            >
-              <CalendarIcon className="h-5 w-5 mr-2" />
-              Programar Reporte
-            </Button>
-            
-            <Button
-              onClick={() => toast.success('Compartiendo con profesores...')}
-              variant="outline"
-              className="w-full"
-            >
-              <AcademicCapIcon className="h-5 w-5 mr-2" />
-              Compartir con Profesores
-            </Button>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="bg-white shadow rounded-lg p-4">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>
-              Reporte generado: {new Date().toLocaleDateString('es-CL')} a las {new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
-            </span>
-            <span>
-              Período: {dateRange.start} al {dateRange.end}
-            </span>
-          </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 } 

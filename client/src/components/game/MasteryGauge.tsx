@@ -39,18 +39,24 @@ export function MasteryGauge({ accuracy }: MasteryGaugeProps) {
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
-            <Label
-              value={`${accuracy}%`}
-              position="center"
+            <text
+              x="50%"
+              y="50%"
+              textAnchor="middle"
               dy={-10}
               className="text-4xl font-bold text-gray-800"
-            />
-            <Label
-              value={masteryText}
-              position="center"
+            >
+              {`${accuracy}%`}
+            </text>
+            <text
+              x="50%"
+              y="50%"
+              textAnchor="middle"
               dy={20}
               className="text-lg font-semibold text-gray-500"
-            />
+            >
+              {masteryText}
+            </text>
           </Pie>
         </PieChart>
       </ResponsiveContainer>

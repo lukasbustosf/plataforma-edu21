@@ -61,7 +61,7 @@ export default function TeacherClassesPage() {
   }, [isAuthenticated, isLoading, user])
 
   const { data: classesData, isLoading: classesLoading } = useQuery(
-    'teacher-classes-detailed',
+    ['teacher-classes-detailed'],
     () => api.getClasses(),
     { enabled: !!user?.user_id }
   )

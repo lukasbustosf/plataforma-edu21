@@ -54,7 +54,8 @@ import {
   BellIcon,
   UserIcon,
   PaintBrushIcon,
-  BeakerIcon
+  BeakerIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline'
 import NotificationBell from '@/components/ui/NotificationBell'
 
@@ -88,70 +89,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         return [
           { name: 'Dashboard', href: '/teacher/dashboard', icon: HomeIcon },
           {
-            name: 'Mis Clases',
-            icon: AcademicCapIcon,
+            name: 'Módulo Laboratorios',
+            icon: BeakerIcon,
             children: [
-              { name: 'Gestión de Clases', href: '/teacher/classes', icon: AcademicCapIcon },
-              { name: 'Mis Estudiantes', href: '/teacher/students', icon: UsersIcon },
-              { name: 'Control de Asistencia', href: '/teacher/attendance', icon: ClipboardDocumentCheckIcon },
-            ]
-          },
-          {
-            name: 'Planificación',
-            icon: DocumentDuplicateIcon,
-            children: [
-              { name: 'Planes de Clase', href: '/teacher/lesson', icon: DocumentDuplicateIcon },
-              { name: 'Materiales Didácticos', href: '/teacher/materials', icon: FolderIcon },
-              { name: 'Banco de Preguntas', href: '/teacher/question-bank', icon: BeakerIcon },
-              { name: 'Mis Evaluaciones', href: '/teacher/my-evaluations', icon: DocumentTextIcon },
+              { name: 'Catálogo de Actividades', href: '/teacher/labs/activities', icon: BookOpenIcon },
+              // Puedes agregar aquí otras rutas funcionales del laboratorio si las necesitas
             ]
           },
           {
             name: 'Evaluación',
             icon: DocumentTextIcon,
             children: [
-              { name: 'Crear Quiz/Examen', href: '/teacher/quiz', icon: DocumentTextIcon },
-              { name: 'Tareas y Proyectos', href: '/teacher/assignments', icon: DocumentArrowDownIcon },
-              { name: 'Juegos Educativos', href: '/teacher/games', icon: PlayIcon },
-              { name: 'Catálogo de Juegos OA1', href: '/teacher/oa1-games', icon: TrophyIcon },
+              { name: 'Evaluación Gamificada', href: '/teacher/oa1-games', icon: TrophyIcon },
             ]
           },
           {
-            name: 'Módulo Laboratorios',
-            icon: BeakerIcon,
-            children: [
-              { name: 'Catálogo de Actividades', href: '/teacher/labs/activities', icon: BookOpenIcon },
-              { name: 'Gestión de Material', href: '/teacher/labs/materials', icon: FolderIcon },
-              { name: 'Registro de Uso', href: '/teacher/labs/tracking', icon: ClipboardDocumentCheckIcon },
-              { name: 'Dashboard de Impacto', href: '/teacher/labs/dashboard', icon: ChartBarIcon },
-            ]
-          },
-          {
-            name: 'Herramientas IA',
-            icon: CpuChipIcon,
-            children: [
-              { name: 'Engines de Juego', href: '/teacher/engines', icon: CpuChipIcon },
-              { name: 'Sistema de Skins', href: '/teacher/skins', icon: PaintBrushIcon },
-              { name: 'Demos Interactivos', href: '/demos', icon: PlayIcon },
-            ]
-          },
-          {
-            name: 'Comunicación',
-            icon: ChatBubbleLeftRightIcon,
-            children: [
-              { name: 'Mensajes', href: '/teacher/messages', icon: ChatBubbleLeftRightIcon },
-            ]
-          },
-          {
-            name: 'Análisis y Reportes',
+            name: 'Reportes',
             icon: ChartBarIcon,
             children: [
-              { name: 'Analíticas de Clase', href: '/teacher/analytics', icon: ChartBarIcon },
-              { name: 'Reportes de Progreso', href: '/teacher/reports', icon: PresentationChartBarIcon },
+              { name: 'Análisis y Métricas', href: '/teacher/reports', icon: DocumentChartBarIcon },
             ]
           },
-          { name: 'Configuración', href: '/teacher/settings', icon: CogIcon },
-        ]
+          // Eliminado: { name: 'Configuración', href: '/teacher/settings', icon: CogIcon },
+          // Eliminado: { name: 'Ayuda', href: '/help', icon: QuestionMarkCircleIcon },
+        ];
       case 'STUDENT':
         return [
           { name: 'Dashboard', href: '/student/dashboard', icon: HomeIcon },
@@ -218,6 +179,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             icon: ChartBarIcon,
             children: [
               { name: 'Reportes Académicos', href: '/school/reports', icon: PresentationChartBarIcon },
+              { name: 'Análisis y Métricas', href: '/school/reports', icon: DocumentChartBarIcon },
+              { name: 'Laboratorios y Juegos', href: '/school/reports', icon: BeakerIcon },
               { name: 'Presupuesto IA', href: '/school/ai-budget', icon: CpuChipIcon },
             ]
           },
@@ -267,6 +230,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             icon: DocumentChartBarIcon,
             children: [
               { name: 'Reportes Ejecutivos', href: '/sostenedor/executive-reports', icon: DocumentChartBarIcon },
+              { name: 'Análisis y Métricas', href: '/sostenedor/reports', icon: DocumentChartBarIcon },
+              { name: 'Laboratorios y Juegos', href: '/sostenedor/reports', icon: BeakerIcon },
+              { name: 'Reporte de Red', href: '/sostenedor/reports', icon: GlobeAltIcon },
               { name: 'Compliance y Auditoría', href: '/sostenedor/compliance', icon: ShieldCheckIcon },
               { name: 'Exportaciones Masivas', href: '/sostenedor/bulk-exports', icon: DocumentArrowDownIcon },
             ]
@@ -372,7 +338,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         ]
       case 'SUPER_ADMIN_FULL':
         return [
-          { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+          { name: 'Dashboard V1', href: '/admin/dashboard', icon: HomeIcon },
           {
             name: 'Gestión de Red',
             icon: BuildingOfficeIcon,
@@ -418,6 +384,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             icon: DocumentChartBarIcon,
             children: [
               { name: 'Dashboard Ejecutivo', href: '/admin/executive-dashboard', icon: DocumentChartBarIcon },
+              { name: 'Análisis y Métricas', href: '/admin/reports', icon: DocumentChartBarIcon },
+              { name: 'Laboratorios y Juegos', href: '/admin/reports', icon: BeakerIcon },
               { name: 'Reportes de Uso', href: '/admin/usage-reports', icon: DocumentArrowDownIcon },
               { name: 'Compliance y Legal', href: '/admin/compliance', icon: DocumentCheckIcon },
               { name: 'Exportaciones Masivas', href: '/admin/bulk-exports', icon: DocumentDuplicateIcon },

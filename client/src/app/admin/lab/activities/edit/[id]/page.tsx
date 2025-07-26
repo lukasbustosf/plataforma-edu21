@@ -12,14 +12,25 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 interface Material { id: number; name: string; }
 
-const FieldGroup = ({ label, children }) => (
+interface FieldGroupProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+interface SectionCardProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const FieldGroup = ({ label, children }: FieldGroupProps) => (
   <div>
     <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     {children}
   </div>
 );
 
-const SectionCard = ({ title, icon, children }) => (
+const SectionCard = ({ title, icon, children }: SectionCardProps) => (
   <div className="bg-white p-6 rounded-lg shadow">
     <h2 className="text-lg font-semibold text-gray-800 border-b pb-3 mb-4 flex items-center">
       {icon}
@@ -43,13 +54,16 @@ export default function EditActivityPage() {
     const fetchData = async () => {
       if (!id) return;
       try {
+        const token = localStorage.getItem('auth_token');
         const [activityRes, materialsRes] = await Promise.all([
-          fetch(`/api/lab/activities/id/${id}`),
-          fetch('/api/lab/materials')
+          fetch(`/api/lab/activities/id/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/lab/materials', { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         const activityResult = await activityRes.json();
         const materialsResult = await materialsRes.json();
+        console.log('Respuesta actividad:', activityResult);
+        console.log('Respuesta materiales:', materialsResult);
 
         if (activityResult.success) {
           const data = activityResult.data;
@@ -64,7 +78,7 @@ export default function EditActivityPage() {
 
         if (materialsResult.success) {
           setMaterials(materialsResult.data);
-        } else { throw new Error('No se pudieron cargar los materiales'); }
+        } else { throw new Error('No se pudo cargar los materiales'); }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -76,7 +90,7 @@ export default function EditActivityPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,16 +98,27 @@ export default function EditActivityPage() {
     setLoading(true);
     setError(null);
     try {
+      // Leer SIEMPRE el token actualizado de localStorage
+      const token = localStorage.getItem('auth_token');
+      console.log('🔍 [DEBUG] Token leído de localStorage:', token);
+      console.log('🔍 [DEBUG] Token substring:', token?.substring(0, 50) + '...');
+      
       const response = await fetch(`/api/lab/activities/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
       });
       const result = await response.json();
-      if (!result.success) throw new Error(result.message);
-      router.push('/admin/lab/activities');
+      if (result.success) {
+        router.push('/admin/lab/activities');
+      } else {
+        setError(result.message || 'Error al actualizar la actividad');
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -170,7 +195,11 @@ export default function EditActivityPage() {
         {/* Barra de Guardado Fija */}
         <div className="sticky bottom-0 bg-white/80 backdrop-blur-sm border-t p-4 mt-8">
           <div className="max-w-7xl mx-auto flex justify-end">
-            {error && <p className="text-sm text-red-600 mr-4 self-center">{error}</p>}
+            {error && (
+              <div className="text-red-500 font-bold text-center mt-4">
+                Error: {error}
+              </div>
+            )}
             <Button type="submit" disabled={loading}>
               {loading ? 'Actualizando...' : 'Actualizar Actividad'}
             </Button>

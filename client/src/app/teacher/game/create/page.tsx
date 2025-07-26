@@ -26,7 +26,7 @@ export default function CreateGamePage() {
   const [gameFormat, setGameFormat] = useState('trivia_lightning')
 
   const { data: quizzesData, isLoading } = useQuery(
-    'teacher-quizzes-for-game',
+    ['teacher-quizzes-for-game'],
     () => api.getQuizzes({ limit: 20 }),
     { enabled: !!user?.user_id }
   )

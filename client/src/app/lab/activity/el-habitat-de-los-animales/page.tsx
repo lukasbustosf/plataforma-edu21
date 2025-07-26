@@ -107,7 +107,13 @@ export default function ActivityDetailPage() {
     {
       id: 'materials',
       label: <><FaTools /> Materiales</>,
-      content: <MaterialsList materials={activityData.materials || []} />
+      content: <MaterialsList materials={(activityData.materials || []).map((material: any, index: number) => ({
+        id: material.id || `material-${index}`,
+        name: material.name,
+        quantity: material.quantity,
+        unit: material.unit || 'unidad',
+        imageUrl: material.imageUrl
+      }))} />
     },
     {
       id: 'video',

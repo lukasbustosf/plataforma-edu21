@@ -111,7 +111,7 @@ export function useRegisterActivityExecution() {
       queryClient.invalidateQueries({ queryKey: ['activity-logs'] })
     },
     onError: (error) => {
-      toast.error('❌ Error al registrar: ' + error.message)
+      toast.error('❌ Error al registrar: ' + (error as Error).message)
     }
   })
 }
