@@ -3,32 +3,5 @@
   "outputDirectory": "client/.next",
   "installCommand": "cd client && npm install",
   "devCommand": "cd client && npm run dev",
-  "env": {
-    "NEXT_PUBLIC_APP_ENV": "production",
-    "NEXT_PUBLIC_API_URL": "https://api-placeholder.edu21.cl",
-    "NEXT_PUBLIC_DEMO_MODE": "true",
-    "NEXT_PUBLIC_BYPASS_AUTH": "true"
-  },
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        }
-      ]
-    }
-  ]
+  "framework": "nextjs"
 } 
