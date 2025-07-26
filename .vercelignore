@@ -65,7 +65,3 @@ railway.json
 !client/package-lock.json
 !client/tsconfig.json
 !client/next.config.js
-
-# Temporarily ignore problematic pages for debugging
-client/src/app/admin/access-policies/
-client/src/app/admin/ai-budgets/
