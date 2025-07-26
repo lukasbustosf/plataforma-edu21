@@ -1,36 +1,21 @@
 {
-  "name": "edu21-mvp",
-  "version": "1.1.0",
-  "description": "EDU21 Intranet - Gamified Educational Platform MVP",
+  "name": "edu21-backend",
+  "version": "1.0.0",
+  "description": "Backend para plataforma EDU21",
   "main": "server/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "server:dev": "cd server && npm run dev",
-    "client:dev": "cd client && npm run dev",
-    "build": "npm run client:build && npm run server:build",
-    "client:build": "cd client && npm run build",
-    "server:build": "cd server && npm run build",
     "start": "cd server && npm start",
-    "test": "npm run server:test && npm run client:test",
-    "server:test": "cd server && npm test",
-    "client:test": "cd client && npm test",
-    "setup": "npm install && cd server && npm install && cd ../client && npm install"
+    "install": "cd server && npm install",
+    "build": "cd server && npm install"
   },
-  "keywords": [
-    "education",
-    "gamification",
-    "quiz",
-    "learning",
-    "chile"
-  ],
-  "author": "EDU21 Team",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^9.1.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.50.5",
-    "axios": "^1.10.0",
-    "node-fetch": "^2.7.0"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lukasbustosf/plataforma-edu21.git"
+  },
+  "keywords": ["education", "platform", "nodejs"],
+  "author": "Lukas Bustos",
+  "license": "MIT"
 }
