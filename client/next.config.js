@@ -26,11 +26,7 @@ const nextConfig = {
       fs: false,
     };
     
-    // Configurar path aliases explícitamente
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
-    };
+    
     
     return config;
   },
