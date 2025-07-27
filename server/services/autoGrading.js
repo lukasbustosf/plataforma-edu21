@@ -2,47 +2,57 @@ const { supabase } = require('../database/supabase');
 const logger = require('../utils/logger');
 
 /**
- * Auto-Grading Service
- * Implements the cron workflow from MODULO II:
- * "Cron Gradebook: nightly job convierte score_raw en nota_10 según grading_scale y llena gradebook_entry"
+ * AutoGrading Service for EDU21
+ * Handles automatic grading and evaluation processing
+ * 
+ * 🚨 TEMPORARILY DISABLED - Database connection issues
  */
 
 class AutoGradingService {
   
   /**
    * Main function to process all pending evaluations
-   * Should be called by cron job nightly
+   * 🚨 TEMPORARILY DISABLED
    */
   static async processAllPendingGrades() {
     logger.info('🤖 Starting auto-grading process...');
     
+    // 🚨 TEMPORARILY DISABLED - Database connection issues
+    logger.info('⚠️ Auto-grading temporarily disabled for database stability');
+    return {
+      processed: 0,
+      errors: 0,
+      message: 'Auto-grading disabled for stability'
+    };
+    
+    /*
     try {
-      // Get all submitted attempts that haven't been processed into gradebook
-      const { data: pendingAttempts, error } = await supabase
+      // Get all pending evaluation attempts
+      const { data: attempts, error } = await supabase
         .from('evaluation_attempts')
         .select(`
           *,
           evaluations!inner(
-            eval_id,
-            grading_scale,
-            total_points,
-            school_id,
-            class_id
+            evaluation_id,
+            title,
+            type,
+            total_points
           )
         `)
-        .in('status', ['submitted', 'graded'])
-        .is('processed_to_gradebook', null); // New field to track processing
+        .eq('status', 'completed')
+        .is('score_10', null);
 
-      if (error) throw error;
-
-      logger.info(`📊 Found ${pendingAttempts.length} pending attempts to process`);
+      if (error) {
+        logger.error('Error fetching pending attempts:', error);
+        throw error;
+      }
 
       let processed = 0;
       let errors = 0;
 
-      for (const attempt of pendingAttempts) {
+      for (const attempt of attempts) {
         try {
-          await this.processAttemptToGradebook(attempt);
+          await this.processSingleAttempt(attempt);
           processed++;
         } catch (error) {
           logger.error(`Error processing attempt ${attempt.attempt_id}:`, error);
@@ -51,13 +61,13 @@ class AutoGradingService {
       }
 
       logger.info(`✅ Auto-grading completed: ${processed} processed, ${errors} errors`);
-      
       return { processed, errors };
 
     } catch (error) {
       logger.error('❌ Auto-grading process failed:', error);
       throw error;
     }
+    */
   }
 
   /**
@@ -156,40 +166,36 @@ class AutoGradingService {
 
   /**
    * Process overdue evaluations
-   * Mark students who haven't submitted as "overdue"
+   * 🚨 TEMPORARILY DISABLED
    */
   static async processOverdueEvaluations() {
     logger.info('⏰ Processing overdue evaluations...');
-
+    
+    // 🚨 TEMPORARILY DISABLED - Database connection issues
+    logger.info('⚠️ Overdue evaluations processing temporarily disabled');
+    return;
+    
+    /*
     try {
-      const now = new Date();
-
       // Get evaluations that are past due date
       const { data: overdueEvaluations, error } = await supabase
         .from('evaluations')
-        .select(`
-          eval_id,
-          due_date,
-          class_id,
-          total_points,
-          grading_scale,
-          school_id
-        `)
-        .lt('due_date', now.toISOString())
-        .eq('status', 'published');
+        .select('*')
+        .lt('due_date', new Date().toISOString())
+        .eq('status', 'active');
 
       if (error) throw error;
 
       for (const evaluation of overdueEvaluations) {
-        await this.processOverdueEvaluation(evaluation);
+        await this.closeOverdueEvaluation(evaluation.evaluation_id);
       }
 
       logger.info(`✅ Processed ${overdueEvaluations.length} overdue evaluations`);
-
     } catch (error) {
       logger.error('❌ Error processing overdue evaluations:', error);
       throw error;
     }
+    */
   }
 
   /**

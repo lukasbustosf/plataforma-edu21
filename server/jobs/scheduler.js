@@ -5,6 +5,8 @@ const logger = require('../utils/logger');
 /**
  * Job Scheduler for EDU21
  * Implements cron jobs from MODULO II specifications
+ * 
+ * 🚨 TEMPORARILY DISABLED - Database connection issues
  */
 
 class JobScheduler {
@@ -12,7 +14,11 @@ class JobScheduler {
   static init() {
     logger.info('🕐 Initializing job scheduler...');
     
-    // Nightly auto-grading job (2:00 AM daily)
+    // 🚨 TEMPORARILY DISABLED - All cron jobs disabled for stability
+    logger.info('⚠️ All cron jobs temporarily disabled for database stability');
+    
+    /*
+    // Nightly auto-grading job (2:00 AM daily) - DISABLED
     // "Cron Gradebook: nightly job convierte score_raw en nota_10"
     cron.schedule('0 2 * * *', async () => {
       logger.info('🌙 Starting nightly auto-grading job...');
@@ -27,7 +33,7 @@ class JobScheduler {
       timezone: "America/Santiago" // Chilean timezone
     });
 
-    // Overdue evaluations check (every hour during school hours)
+    // Overdue evaluations check (every hour during school hours) - DISABLED
     cron.schedule('0 8-18 * * 1-5', async () => {
       logger.info('⏰ Checking for overdue evaluations...');
       try {
@@ -41,7 +47,7 @@ class JobScheduler {
       timezone: "America/Santiago"
     });
 
-    // Weekly grade statistics update (Sundays at 6:00 AM)
+    // Weekly grade statistics update (Sundays at 6:00 AM) - DISABLED
     cron.schedule('0 6 * * 0', async () => {
       logger.info('📊 Generating weekly statistics...');
       try {
@@ -55,7 +61,7 @@ class JobScheduler {
       timezone: "America/Santiago"
     });
 
-    // Database cleanup (monthly on 1st at 3:00 AM)
+    // Database cleanup (monthly on 1st at 3:00 AM) - DISABLED
     cron.schedule('0 3 1 * *', async () => {
       logger.info('🧹 Running monthly database cleanup...');
       try {
@@ -68,8 +74,9 @@ class JobScheduler {
       scheduled: true,
       timezone: "America/Santiago"
     });
+    */
 
-    logger.info('✅ Job scheduler initialized with 4 cron jobs');
+    logger.info('✅ Job scheduler initialized - All jobs disabled for stability');
   }
 
   /**

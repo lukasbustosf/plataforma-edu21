@@ -868,7 +868,7 @@ router.post('/gradebook/calculate', authenticateToken, async (req, res) => {
 
         // Get all pending evaluation attempts
         const { data: attempts, error: attemptsError } = await supabase
-            .from('evaluation_attempts')
+            // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
             .select(`
                 attempt_id,
                 eval_id,

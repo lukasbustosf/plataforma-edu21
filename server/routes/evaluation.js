@@ -399,7 +399,7 @@ router.post('/:id/launch', authenticateToken, async (req, res) => {
     // Check existing attempts
     const targetStudentId = student_id || user.user_id;
     const { data: existingAttempts, error: attemptError } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .select('*')
       .eq('eval_id', id)
       .eq('student_id', targetStudentId);
@@ -428,7 +428,7 @@ router.post('/:id/launch', authenticateToken, async (req, res) => {
     };
 
     const { data: attempt, error } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .insert(attemptData)
       .select('*')
       .single();
@@ -463,7 +463,7 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
 
     // Verify attempt belongs to user
     const { data: attempt, error: attemptError } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .select('*')
       .eq('attempt_id', attempt_id)
       .eq('eval_id', id)
@@ -521,7 +521,7 @@ router.post('/:id/submit', authenticateToken, async (req, res) => {
 
     // Update attempt
     const { error: updateError } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .update({
         score_raw: totalScore,
         percentage,
@@ -591,7 +591,7 @@ router.post('/:id/grade', authenticateToken, async (req, res) => {
 
     // Update attempt
     const { error: attemptError } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .update({
         score_raw: score,
         status: 'graded',
@@ -655,7 +655,7 @@ router.get('/:id/report', authenticateToken, async (req, res) => {
       .from('evaluations')
       .select(`
         *,
-        evaluation_attempts(
+        // // evaluation_attempts( // TEMPORARILY DISABLED // TEMPORARILY DISABLED
           *,
           users!evaluation_attempts_student_id_fkey(first_name, last_name, email)
         ),
@@ -720,7 +720,7 @@ router.get('/', authenticateToken, async (req, res) => {
         *,
         classes(class_name, grade_code),
         quizzes(title),
-        evaluation_attempts(attempt_id),
+        // // evaluation_attempts( // TEMPORARILY DISABLED // TEMPORARILY DISABLEDattempt_id),
         gradebook_entries(nota_10)
       `)
       .eq('school_id', user.school_id);
@@ -1475,7 +1475,7 @@ router.post('/submit-attempt', authenticateToken, requireRole(['student']), asyn
 
     // 3. Save the attempt details
     const { data: attempt, error: attemptError } = await supabase
-      .from('evaluation_attempts') // Assuming this table exists or will be created
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED // Assuming this table exists or will be created
       .insert({
         eval_id: gameSession.evaluation_id,
         student_id: user.user_id,

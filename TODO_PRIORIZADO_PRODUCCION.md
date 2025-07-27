@@ -12,7 +12,7 @@ Dejar una versión estable y funcional de la plataforma en producción, con solo
   - Evaluación → Submódulo “Evaluación gamificada” (`/teacher/oa1-games`)
   -http://localhost:3000/settings 
   -y "http://localhost:3000/help" hay que ver bien que dejamos por que "tutoriales" deberia decir "proximamente"en "contacto" de esa mima pagina, la informacion de contacto esta erronea, podrias agregar la real Fono central centro de ayuda "232144445" por favor. 
-  
+
 - [ ] **Ocultar o eliminar del menú:**
   - Todos los demás módulos y submódulos (tracking, dashboard, reportes, IA, etc.) que no estén listos para producción.
 - [ ] **Verificar que no haya rutas rotas o accesibles por URL directa** (404, errores de permisos, etc.).
@@ -24,12 +24,12 @@ Dejar una versión estable y funcional de la plataforma en producción, con solo
 - [ ] **Laboratorios Móviles:**
   - Registro de ejecución (con y sin evidencia).
   - Visualización de historial y métricas.
+  - revisar filtros de "http://localhost:3000/teacher/labs/activities" falta agregar filtrar por material didactico , 
   - Visualización de actividades y detalles.
 - [ ] **Evaluación gamificada:**
   - Acceso y uso correcto de `/teacher/oa1-games`.
   - Visualización y funcionamiento de las evaluaciones gamificadas.
-  tambien deja
-  http://localhost:3000/settings y "http://localhost:3000/help" hay que ver bien que dejamos por que "tutoriales" deberia decir "proximamente"en "contacto" de esa mima pagina, la informacion de contacto esta erronea, podrias agregar la real Fono central centro de ayuda "232144445" por favor. 
+  
 - [ ] **Datos de seed:**
   - Verificar que los datos de demo/seed estén cargados y visibles para pruebas/demo.
 

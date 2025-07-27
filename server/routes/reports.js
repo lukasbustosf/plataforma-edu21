@@ -315,7 +315,7 @@ router.get('/weekly/oa-bloom/:classId', authenticateToken, requireRole(['TEACHER
 
     // Get evaluations and attempts for the period
     const { data: weeklyData, error: weeklyError } = await supabase
-      .from('evaluation_attempts')
+      // // .from('evaluation_attempts') // TEMPORARILY DISABLED // TEMPORARILY DISABLED
       .select(`
         attempt_id,
         student_id,
