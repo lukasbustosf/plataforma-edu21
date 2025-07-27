@@ -8,10 +8,6 @@ railway.json
 *.ps1
 *.py
 tests/
-*.test.js
-*.test.ts
-*.spec.js
-*.spec.ts
 
 # Documentación
 *.md
