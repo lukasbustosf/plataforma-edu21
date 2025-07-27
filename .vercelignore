@@ -64,4 +64,4 @@ railway.json
 !client/package.json
 !client/package-lock.json
 !client/tsconfig.json
-!client/next.config.js
+!client/next.config.js 
