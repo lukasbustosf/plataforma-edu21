@@ -8,6 +8,53 @@ const logger = require('../utils/logger');
 
 const router = express.Router();
 
+// GET /api/auth/status - Check authentication status
+router.get('/status', (req, res) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        error: {
+          message: 'No token provided',
+          code: 'NO_TOKEN'
+        }
+      });
+    }
+    
+    // Verify token
+    const decoded = decodeToken(token);
+    if (!decoded) {
+      return res.status(401).json({
+        error: {
+          message: 'Invalid token',
+          code: 'INVALID_TOKEN'
+        }
+      });
+    }
+    
+    res.json({
+      status: 'authenticated',
+      user: {
+        user_id: decoded.user_id,
+        email: decoded.email,
+        role: decoded.role,
+        school_id: decoded.school_id
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    logger.error('Error in auth status endpoint:', error);
+    res.status(500).json({
+      error: {
+        message: 'Internal server error',
+        code: 'INTERNAL_ERROR'
+      }
+    });
+  }
+});
+
 // Validation schemas
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
