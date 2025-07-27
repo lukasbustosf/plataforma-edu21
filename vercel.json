@@ -1,6 +1,4 @@
 {
-  "buildCommand": "cd client && pnpm install && pnpm run build",
-  "outputDirectory": "client/.next",
-  "installCommand": "cd client && pnpm install",
-  "devCommand": "cd client && pnpm run dev"
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/.next"
 } 
