@@ -48,7 +48,12 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 const io = socketIo(server, {
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ["http://localhost:3000"],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      "http://localhost:3000",
+      "https://plataforma-edu21-grlcir15d-lukasbustosfs-projects.vercel.app",
+      "https://plataforma-edu21.vercel.app",
+      "https://*.vercel.app"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -56,7 +61,12 @@ const io = socketIo(server, {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ["http://localhost:3000"],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    "http://localhost:3000",
+    "https://plataforma-edu21-grlcir15d-lukasbustosfs-projects.vercel.app",
+    "https://plataforma-edu21.vercel.app",
+    "https://*.vercel.app"
+  ],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
