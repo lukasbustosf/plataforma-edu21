@@ -70,6 +70,9 @@ export default function HomePage() {
         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600 mx-auto"></div>
         <h1 className="mt-6 text-2xl font-bold text-primary-900">EDU21</h1>
         <p className="mt-2 text-primary-600">Cargando plataforma educativa...</p>
+        <noscript>
+          <a href="/login" className="text-sm underline">Continuar al login</a>
+        </noscript>
       </div>
     </div>
   )
