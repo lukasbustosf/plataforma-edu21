@@ -13,7 +13,7 @@ tests/
 *.md
 docs/
 
-# Scripts
+# Scripts (solo en raíz)
 *.ps1
 *.py
 *.js
@@ -34,10 +34,10 @@ logs/
 .env.local
 .env.production
 
-# Dependencies
+# Dependencies (solo en raíz)
 node_modules/
 
-# Build artifacts
+# Build artifacts (solo en raíz)
 .next/
 dist/
 build/
@@ -64,4 +64,5 @@ railway.json
 !client/package.json
 !client/package-lock.json
 !client/tsconfig.json
-!client/next.config.js 
+!client/next.config.js
+!client/next-env.d.ts 
