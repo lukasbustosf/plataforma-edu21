@@ -20,7 +20,7 @@ FRONTEND_URL=https://tu-dominio-vercel.vercel.app
 ### **3. Configuración por entorno:**
 - **Production**: Todas las variables
 - **Preview**: Todas las variables  
-- **Development**: Todas las variables
+- **Development**: Todas las variablesx
 
 ### **4. Obtener credenciales de Supabase:**
 1. Ve a https://supabase.com/dashboard
