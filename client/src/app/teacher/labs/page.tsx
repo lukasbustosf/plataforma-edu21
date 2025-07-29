@@ -20,10 +20,10 @@ import {
   SparklesIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { StatsGrid } from '@/components/ui/statsGrid'
-import { ResponsiveTable } from '@/components/ui/responsiveTable'
+import { StatsGrid } from '@/components/ui/StatsGrid'
+import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
 import { formatDate } from '@/lib/utils'
 
 export default function TeacherLabsPage() {

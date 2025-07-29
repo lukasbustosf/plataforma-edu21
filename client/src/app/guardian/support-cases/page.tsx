@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   HeartIcon, 
@@ -525,7 +525,7 @@ export default function GuardianSupportCasesPage() {
 
         {/* Case Detail Modal */}
         <ResponsiveModal
-          open={showCaseModal}
+          isOpen={showCaseModal}
           onClose={() => setShowCaseModal(false)}
           title={selectedCase ? `Detalle del Caso: ${selectedCase.title}` : 'Detalle del Caso'}
           size="xl"

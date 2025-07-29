@@ -18,7 +18,7 @@ import {
   AlertCircle,
   Lightbulb
 } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 
 interface LearningObjective {
   oa_id: string;

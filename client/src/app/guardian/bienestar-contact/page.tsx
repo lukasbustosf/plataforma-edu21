@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   HeartIcon, 
@@ -384,7 +384,7 @@ export default function GuardianBienestarContactPage() {
 
         {/* Contact Modal */}
         <ResponsiveModal
-          open={showContactModal}
+          isOpen={showContactModal}
           onClose={() => {
             setShowContactModal(false)
             setSelectedProfessional(null)

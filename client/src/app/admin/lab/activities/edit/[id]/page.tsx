@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { Select } from '@/components/ui/Select'
+import { Textarea } from '@/components/ui/Textarea'
 import { ArrowLeftIcon, InformationCircleIcon, ListBulletIcon, CheckCircleIcon, DocumentTextIcon, TagIcon, PhotoIcon, VideoCameraIcon, CubeIcon, ClockIcon, UserGroupIcon, ChartBarIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 

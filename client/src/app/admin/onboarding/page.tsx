@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { ResponsiveTable } from '@/components/ui/responsiveTable'
+import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
 import { ResponsiveModal, FormModal } from '@/components/ui/ResponsiveModal'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { 
   PlusIcon, 
   EyeIcon, 
@@ -401,7 +401,7 @@ export default function OnboardingPage() {
 
         {/* Create Process Modal */}
         <FormModal
-          open={isModalOpen}
+          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           title="Crear Nuevo Proceso de Onboarding"
           onSubmit={handleCreateProcess}
@@ -533,7 +533,7 @@ export default function OnboardingPage() {
         {/* Process Detail Modal */}
         {selectedProcess && (
           <ResponsiveModal
-            open={isDetailModalOpen}
+            isOpen={isDetailModalOpen}
             onClose={() => {
               setIsDetailModalOpen(false)
               setSelectedProcess(null)

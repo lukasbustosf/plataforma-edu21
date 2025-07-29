@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { Select } from '@/components/ui/Select'
+import { Textarea } from '@/components/ui/Textarea'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 

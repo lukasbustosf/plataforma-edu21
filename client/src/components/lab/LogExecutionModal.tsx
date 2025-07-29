@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Fragment, ChangeEvent } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/Textarea';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';

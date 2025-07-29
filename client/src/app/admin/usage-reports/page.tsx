@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
-import { StatsGrid } from '@/components/ui/statsGrid'
-import { ResponsiveTable } from '@/components/ui/responsiveTable'
+import { Button } from '@/components/ui/Button'
+import { StatsGrid } from '@/components/ui/StatsGrid'
+import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   ChartBarIcon,
@@ -698,7 +698,7 @@ export default function AdminUsageReportsPage() {
 
       {/* Feature Details Modal */}
       <ResponsiveModal
-        open={showDetailsModal}
+        isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         title={`Análisis Detallado - ${selectedFeature?.feature}`}
         size="lg"

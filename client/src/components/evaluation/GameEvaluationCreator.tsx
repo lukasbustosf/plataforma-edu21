@@ -19,7 +19,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import OASelector from '@/components/ui/OASelector'
 import QuestionBankSelector from '@/components/evaluation/QuestionBankSelector' // New import
 import type { BloomLevel, GameFormat } from '@/types'

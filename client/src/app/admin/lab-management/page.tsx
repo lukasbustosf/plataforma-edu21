@@ -10,7 +10,7 @@ import {
   TrashIcon,
   BeakerIcon
 } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 

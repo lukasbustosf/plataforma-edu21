@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Select } from '@/components/ui/select'
+import { Select } from '@/components/ui/Select'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 

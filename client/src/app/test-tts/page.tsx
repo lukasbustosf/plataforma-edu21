@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import TTSControls, { TTSButton, useTTS } from '@/components/ui/ttsControls';
+import TTSControls, { TTSButton, useTTS } from '@/components/ui/TTSControls';
 
 export default function TestTTSPage() {
   const [testText, setTestText] = useState(

@@ -12,7 +12,7 @@ import {
   EyeIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline'
-import { Button } from '../ui/button'
+import { Button } from '../ui/Button'
 
 interface DataPoint {
   [key: string]: string | number
