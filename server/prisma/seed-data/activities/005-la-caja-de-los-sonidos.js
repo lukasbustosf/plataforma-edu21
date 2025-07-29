@@ -21,7 +21,7 @@ module.exports = {
       "https://docs.google.com/presentation/d/11JVlBfJiEI4I-lta7w4AnpiavgFerAXa/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
       "https://docs.google.com/document/d/1MyXfKl9Wc7HJVWmItB4ig0stWgi7kq_P/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://docs.google.com/presentation/d/11JVlBfJiEI4I-lta7w4AnpiavgFerAXa/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+    "cover_image_url": "https://i.ibb.co/JjWTcvLz/Captura-de-pantalla-2025-07-27-a-la-s-6-33-48-p-m-removebg-preview.png",
     "video_url": "",
     "oa_ids": [
       "OA 10",
