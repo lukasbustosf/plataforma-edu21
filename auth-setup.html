@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDU21 - Configuración de Autenticación</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            border: 1px solid #dee2e6;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 EDU21 - Configuración de Autenticación</h1>
+        
+        <div class="success">
+            ✅ Token demo generado exitosamente
+        </div>
+        
+        <h2>📋 Instrucciones:</h2>
+        <ol>
+            <li>Abre tu aplicación EDU21 en el navegador</li>
+            <li>Presiona <strong>F12</strong> para abrir las herramientas de desarrollador</li>
+            <li>Ve a la pestaña <strong>Console</strong></li>
+            <li>Copia y pega el siguiente código:</li>
+        </ol>
+        
+        <div class="code">
+// Script de autenticación automática para EDU21
+// Ejecuta este código en la consola del navegador (F12)
+
+console.log('🔐 Configurando autenticación demo...');
+
+// Limpiar tokens existentes
+localStorage.removeItem('auth_token');
+localStorage.removeItem('user_data');
+
+// Configurar token demo
+localStorage.setItem('auth_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibW9jay10ZWFjaGVyLWlkIiwic2Nob29sX2lkIjoibW9jay1zY2hvb2wtaWQiLCJyb2xlIjoiVEVBQ0hFUiIsImVtYWlsIjoidGVhY2hlckBkZW1vLmVkdTIxLmNsIiwiaWF0IjoxNzUzNzM3NzQ3LCJleHAiOjE3NTQzNDI1NDd9.6k5844CVMWVY-TMNpACpjcMD0QU0K-pBLQtNG8DnpGI');
+
+// Configurar datos del usuario demo
+const userData = {
+  user_id: '57e39af0-1ee5-4fcf-9537-65a01ea88be6',
+  school_id: '550e8400-e29b-41d4-a716-446655440000',
+  email: 'teacher@demo.edu21.cl',
+  first_name: 'Profesor',
+  last_name: 'Demo',
+  role: 'TEACHER'
+};
+
+localStorage.setItem('user_data', JSON.stringify(userData));
+
+console.log('✅ Autenticación configurada');
+console.log('🔄 Recargando página...');
+
+// Recargar la página
+setTimeout(() => {
+  window.location.reload();
+}, 1000);
+</div>
+        
+        <h2>🎯 Alternativa Automática:</h2>
+        <p>Si prefieres, puedes hacer clic en el botón de abajo para abrir automáticamente la aplicación con la autenticación configurada:</p>
+        
+        <button class="button" onclick="openWithAuth()">
+            🚀 Abrir EDU21 con Autenticación
+        </button>
+        
+        <h2>📝 Información del Usuario Demo:</h2>
+        <ul>
+            <li><strong>Email:</strong> teacher@demo.edu21.cl</li>
+            <li><strong>Contraseña:</strong> demo123</li>
+            <li><strong>Rol:</strong> TEACHER</li>
+            <li><strong>Nombre:</strong> Profesor Demo</li>
+        </ul>
+        
+        <div class="warning">
+            ⚠️ Nota: Este token es válido por 7 días. Si expira, ejecuta este script nuevamente.
+        </div>
+    </div>
+
+    <script>
+        function openWithAuth() {
+            // Configurar autenticación
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_data');
+            
+            localStorage.setItem('auth_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibW9jay10ZWFjaGVyLWlkIiwic2Nob29sX2lkIjoibW9jay1zY2hvb2wtaWQiLCJyb2xlIjoiVEVBQ0hFUiIsImVtYWlsIjoidGVhY2hlckBkZW1vLmVkdTIxLmNsIiwiaWF0IjoxNzUzNzM3NzQ3LCJleHAiOjE3NTQzNDI1NDd9.6k5844CVMWVY-TMNpACpjcMD0QU0K-pBLQtNG8DnpGI');
+            
+            const userData = {
+                user_id: '57e39af0-1ee5-4fcf-9537-65a01ea88be6',
+                school_id: '550e8400-e29b-41d4-a716-446655440000',
+                email: 'teacher@demo.edu21.cl',
+                first_name: 'Profesor',
+                last_name: 'Demo',
+                role: 'TEACHER'
+            };
+            
+            localStorage.setItem('user_data', JSON.stringify(userData));
+            
+            // Abrir la aplicación
+            window.open('http://localhost:3000', '_blank');
+        }
+    </script>
+</body>
+</html>

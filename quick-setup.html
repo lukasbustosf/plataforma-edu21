@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDU21 - Configuración Rápida</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .success { background: rgba(76, 175, 80, 0.3); }
+        .info { background: rgba(33, 150, 243, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 EDU21 - Configuración Rápida</h1>
+        
+        <div class="status success">
+            ✅ Servidor funcionando en puerto 5000
+        </div>
+        
+        <div class="status info">
+            ✅ Cliente configurado para puerto 3000
+        </div>
+        
+        <h2>🎯 Configuración Automática</h2>
+        
+        <button class="button" onclick="setupAndOpen()">
+            🚀 Configurar y Abrir EDU21
+        </button>
+        
+        <div class="status info">
+            <strong>Información:</strong><br>
+            • Servidor: http://localhost:5000<br>
+            • Cliente: http://localhost:3000<br>
+            • Usuario: teacher@demo.edu21.cl
+        </div>
+    </div>
+
+    <script>
+        function setupAndOpen() {
+            // Configurar autenticación
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_data');
+            
+            localStorage.setItem('auth_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibW9jay10ZWFjaGVyLWlkIiwic2Nob29sX2lkIjoibW9jay1zY2hvb2wtaWQiLCJyb2xlIjoiVEVBQ0hFUiIsImVtYWlsIjoidGVhY2hlckBkZW1vLmVkdTIxLmNsIiwiaWF0IjoxNzUzNzM4MzYyLCJleHAiOjE3NTQzNDMxNjJ9.MZj43EtLaOfeTszfkgoLtl7AGhPX5x7wRwroJIXQkQE');
+            
+            const userData = {
+                user_id: '57e39af0-1ee5-4fcf-9537-65a01ea88be6',
+                school_id: '550e8400-e29b-41d4-a716-446655440000',
+                email: 'teacher@demo.edu21.cl',
+                first_name: 'Profesor',
+                last_name: 'Demo',
+                role: 'TEACHER'
+            };
+            
+            localStorage.setItem('user_data', JSON.stringify(userData));
+            
+            // Abrir la aplicación
+            window.open('http://localhost:3000', '_blank');
+        }
+    </script>
+</body>
+</html>

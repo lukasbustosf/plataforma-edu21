@@ -79,6 +79,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'EDU21 API Server',
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    environment: process.env.NODE_ENV,
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      lab: '/api/lab',
+      game: '/api/game',
+      quiz: '/api/quiz'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
