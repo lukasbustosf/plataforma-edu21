@@ -111,90 +111,99 @@ async function authenticateToken(req, res, next) {
       });
     }
 
-    // Verify JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'development_jwt_secret_key_change_in_production';
-    const decoded = jwt.verify(token, jwtSecret);
-    
-    // For development mode, if Supabase is not available, use mock user
-    if (!supabase) {
-      logger.warn('Supabase not available, using mock authentication for development');
-      req.user = {
-        user_id: decoded.user_id || 'mock-user-id',
-        school_id: decoded.school_id || 'mock-school-id',
-        email: decoded.email || 'mock@example.com',
-        first_name: decoded.first_name || 'Mock',
-        last_name: decoded.last_name || 'User',
-        role: decoded.role || 'STUDENT',
-        active: true
-      };
-      req.school_id = req.user.school_id;
-      return next();
-    }
-    
-    // Get user details from database
-    const { data: user, error } = await supabase
-      .from('users')
-      .select(`
-        user_id,
-        school_id,
-        email,
-        first_name,
-        last_name,
-        role,
-        active,
-        schools (
-          school_id,
-          school_name,
-          school_code,
-          active
-        )
-      `)
-      .eq('user_id', decoded.user_id)
-      .eq('active', true)
-      .single();
+    // If it's not a demo token, try to verify as JWT
+    if (!token.startsWith('demo-token-')) {
+      try {
+        // Verify JWT token
+        const jwtSecret = process.env.JWT_SECRET || 'development_jwt_secret_key_change_in_production';
+        const decoded = jwt.verify(token, jwtSecret);
+        
+        // For development mode, if Supabase is not available, use mock user
+        if (!supabase) {
+          logger.warn('Supabase not available, using mock authentication for development');
+          req.user = {
+            user_id: decoded.user_id || 'mock-user-id',
+            school_id: decoded.school_id || 'mock-school-id',
+            email: decoded.email || 'mock@example.com',
+            first_name: decoded.first_name || 'Mock',
+            last_name: decoded.last_name || 'User',
+            role: decoded.role || 'STUDENT',
+            active: true
+          };
+          req.school_id = req.user.school_id;
+          return next();
+        }
+        
+        // Get user details from database
+        const { data: user, error } = await supabase
+          .from('users')
+          .select(`
+            user_id,
+            school_id,
+            email,
+            first_name,
+            last_name,
+            role,
+            active,
+            schools (
+              school_id,
+              school_name,
+              school_code,
+              active
+            )
+          `)
+          .eq('user_id', decoded.user_id)
+          .eq('active', true)
+          .single();
 
-    if (error || !user) {
-      logger.warn(`Authentication failed for token: ${error?.message}`);
-      
-      // For development, create a mock user if database lookup fails
-      if (process.env.NODE_ENV === 'development') {
-        logger.warn('Using mock authentication for development');
-        req.user = {
-          user_id: decoded.user_id || 'mock-user-id',
-          school_id: decoded.school_id || 'mock-school-id',
-          email: decoded.email || 'mock@example.com',
-          first_name: decoded.first_name || 'Mock',
-          last_name: decoded.last_name || 'User',
-          role: decoded.role || 'STUDENT',
-          active: true
-        };
-        req.school_id = req.user.school_id;
+        if (error || !user) {
+          logger.warn(`Authentication failed for token: ${error?.message}`);
+          
+          // For development, create a mock user if database lookup fails
+          if (process.env.NODE_ENV === 'development') {
+            logger.warn('Using mock authentication for development');
+            req.user = {
+              user_id: decoded.user_id || 'mock-user-id',
+              school_id: decoded.school_id || 'mock-school-id',
+              email: decoded.email || 'mock@example.com',
+              first_name: decoded.first_name || 'Mock',
+              last_name: decoded.last_name || 'User',
+              role: decoded.role || 'STUDENT',
+              active: true
+            };
+            req.school_id = req.user.school_id;
+            return next();
+          }
+          
+          return res.status(401).json({
+            error: {
+              message: 'Invalid or expired token',
+              code: 'INVALID_TOKEN'
+            }
+          });
+        }
+
+        req.user = user;
+        req.school_id = user.school_id;
         return next();
+      } catch (jwtError) {
+        logger.warn(`JWT verification failed: ${jwtError.message}`);
+        return res.status(401).json({
+          error: {
+            message: 'Invalid token format',
+            code: 'INVALID_TOKEN_FORMAT'
+          }
+        });
       }
-      
-      return res.status(401).json({
-        error: {
-          message: 'Invalid or expired token',
-          code: 'INVALID_TOKEN'
-        }
-      });
     }
 
-    // Check if school is active (only if schools data exists)
-    if (user.schools && !user.schools.active) {
-      return res.status(403).json({
-        error: {
-          message: 'School account is inactive',
-          code: 'INACTIVE_SCHOOL'
-        }
-      });
-    }
-
-    // Attach user info to request
-    req.user = user;
-    req.school_id = user.school_id;
-    
-    next();
+    // If we reach here, it's an invalid token
+    return res.status(401).json({
+      error: {
+        message: 'Invalid token format',
+        code: 'INVALID_TOKEN_FORMAT'
+      }
+    });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({
