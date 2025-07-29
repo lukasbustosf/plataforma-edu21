@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   DocumentTextIcon,
@@ -523,7 +523,7 @@ export default function GuardianPAIDocumentsPage() {
 
         {/* Document View Modal */}
         <ResponsiveModal
-          isOpen={showDocumentModal}
+          open={showDocumentModal}
           onClose={() => {
             setShowDocumentModal(false)
             setSelectedDocument(null)

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   DocumentTextIcon,
@@ -469,7 +469,7 @@ export default function GuardianDigitalRecordsPage() {
 
         {/* Record View Modal */}
         <ResponsiveModal
-          isOpen={showRecordModal}
+          open={showRecordModal}
           onClose={() => {
             setShowRecordModal(false)
             setSelectedRecord(null)

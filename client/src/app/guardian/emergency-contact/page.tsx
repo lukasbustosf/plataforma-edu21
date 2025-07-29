@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   ExclamationTriangleIcon,
@@ -541,7 +541,7 @@ export default function GuardianEmergencyContactPage() {
 
         {/* Protocol Detail Modal */}
         <ResponsiveModal
-          isOpen={showProtocolModal}
+          open={showProtocolModal}
           onClose={() => setShowProtocolModal(false)}
           title={selectedProtocol?.title || ''}
           size="lg"

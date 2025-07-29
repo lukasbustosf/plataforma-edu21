@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
-import { StatsGrid } from '@/components/ui/StatsGrid'
-import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
+import { Button } from '@/components/ui/button'
+import { StatsGrid } from '@/components/ui/statsGrid'
+import { ResponsiveTable } from '@/components/ui/responsiveTable'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   CurrencyDollarIcon,
@@ -533,7 +533,7 @@ export default function AdminAICostsPage() {
 
       {/* Budget Configuration Modal */}
       <ResponsiveModal
-        isOpen={showBudgetModal}
+        open={showBudgetModal}
         onClose={() => setShowBudgetModal(false)}
         title="Configurar Presupuesto"
         size="md"
@@ -599,7 +599,7 @@ export default function AdminAICostsPage() {
 
       {/* Details Modal */}
       <ResponsiveModal
-        isOpen={showDetailsModal}
+        open={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         title={`Detalles - ${selectedSchool?.name || 'Servicio'}`}
         size="lg"

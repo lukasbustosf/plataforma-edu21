@@ -3,9 +3,9 @@
 import React, { useState } from 'react'
 import { useAuth } from '@/store/auth'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { Button } from '@/components/ui/Button'
-import { StatsGrid } from '@/components/ui/StatsGrid'
-import { ResponsiveTable } from '@/components/ui/ResponsiveTable'
+import { Button } from '@/components/ui/button'
+import { StatsGrid } from '@/components/ui/statsGrid'
+import { ResponsiveTable } from '@/components/ui/responsiveTable'
 import { ResponsiveModal } from '@/components/ui/ResponsiveModal'
 import { 
   ArrowDownTrayIcon,
@@ -715,7 +715,7 @@ export default function AdminBulkExportsPage() {
 
       {/* Export Configuration Modal */}
       <ResponsiveModal
-        isOpen={showExportModal}
+        open={showExportModal}
         onClose={() => setShowExportModal(false)}
         title={`Configurar Exportación - ${selectedTemplate?.name}`}
         size="md"
@@ -828,7 +828,7 @@ export default function AdminBulkExportsPage() {
 
       {/* Template Details Modal */}
       <ResponsiveModal
-        isOpen={showTemplateModal}
+        open={showTemplateModal}
         onClose={() => setShowTemplateModal(false)}
         title={`Detalles - ${selectedTemplate?.name || 'Plantilla'}`}
         size="lg"
