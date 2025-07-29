@@ -617,8 +617,8 @@ class ApiService {
   }
 
   // Lab Activities methods
-  async getLabActivity(id: string): Promise<any> {
-    return this.request('GET', `/lab/activities/id/${id}`)
+  async getLabActivity(slug: string): Promise<any> {
+    return this.request('GET', `/lab/activities/${slug}`)
   }
 
   async getLabMaterials(): Promise<any> {
