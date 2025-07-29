@@ -45,6 +45,10 @@ const { mockGameData } = require('./services/mockGameData');
 const app = express();
 const server = http.createServer(app);
 
+// Configure trust proxy for Railway deployment
+// This fixes the express-rate-limit error with X-Forwarded-For headers
+app.set('trust proxy', 1);
+
 // Initialize Socket.IO
 const io = socketIo(server, {
   cors: {
