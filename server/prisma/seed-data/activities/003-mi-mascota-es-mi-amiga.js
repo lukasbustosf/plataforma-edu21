@@ -18,11 +18,11 @@ module.exports = {
     "indicators_markdown": "- Nombra algunas características de personas, animales y plantas en diferentes etapas de su proceso de crecimiento.\n\n- Se integra espontáneamente en juegos grupales.",
     "assessment_markdown": "- ¿Memoriza posiciones de fichas?\n- ¿Participa en la actividad grupal?\n- ¿Respeta turnos del juego?\n- ¿Dibuja su mascota preferida?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1REzfB4U2aRNFT_H-mLcLw4fPIWhqb32p/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://drive.google.com/file/d/1ussN3pH8thmOVecYAgsCq3fC4_tCo4Wx/view?usp=drive_link",
-      "https://docs.google.com/document/d/1I42JC0mGfs2m7Ez3b4Ld4Y5rhtu2ShUJ/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/document/d/1I42JC0mGfs2m7Ez3b4Ld4Y5rhtu2ShUJ/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/presentation/d/1REzfB4U2aRNFT_H-mLcLw4fPIWhqb32p/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://drive.google.com/file/d/1ussN3pH8thmOVecYAgsCq3fC4_tCo4Wx/view?usp=sharing"
     ],
-    "cover_image_url": "https://i.imgur.com/example3.png",
+    "cover_image_url": "https://docs.google.com/document/d/1I42JC0mGfs2m7Ez3b4Ld4Y5rhtu2ShUJ/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 7",

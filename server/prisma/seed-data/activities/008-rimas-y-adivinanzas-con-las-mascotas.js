@@ -18,10 +18,10 @@ module.exports = {
     "indicators_markdown": "- Dice el fonema inicial y final de una palabra, a partir de canciones y juegos verbales.\n\n- Se plantea nuevos desafíos en función de sus logros y necesidades.",
     "assessment_markdown": "- ¿Ejercita conciencia fonológica?\n- ¿Dice fonemas iniciales y finales?\n- ¿Participa en rimas y adivinanzas?\n- ¿Se plantea nuevos desafíos?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1m7Ac4MN6Yn0DVZWXr1fVsEYeCnjv9Rn7/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/document/d/110r-Y-UdxCfJRA_bwuyJgVjxX-Z7-wxR/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/document/d/110r-Y-UdxCfJRA_bwuyJgVjxX-Z7-wxR/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/presentation/d/1m7Ac4MN6Yn0DVZWXr1fVsEYeCnjv9Rn7/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example8.png",
+    "cover_image_url": "https://docs.google.com/document/d/110r-Y-UdxCfJRA_bwuyJgVjxX-Z7-wxR/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 8",

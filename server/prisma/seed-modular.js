@@ -40,6 +40,22 @@ async function upsertMaterials(activities) {
   
   const materials = [];
   
+  // Primero, verificar si existe el producto principal
+  let labProduct = await prisma.lab_product.findFirst({
+    where: { name: { contains: 'Laboratorio movil de Parvulo' } }
+  });
+  
+  if (!labProduct) {
+    // Si no existe, usar el primer producto disponible
+    labProduct = await prisma.lab_product.findFirst();
+    if (!labProduct) {
+      console.error('❌ No se encontró ningún producto en la base de datos');
+      return materials;
+    }
+  }
+  
+  console.log(`✅ Usando producto: ${labProduct.name} (ID: ${labProduct.id})`);
+  
   for (const [internalCode, material] of materialsMap) {
     try {
       const upsertedMaterial = await prisma.lab_material.upsert({
@@ -51,7 +67,7 @@ async function upsertMaterials(activities) {
         create: {
           name: material.name,
           internal_code: internalCode,
-          lab_product_id: '550e8400-e29b-41d4-a716-446655440002', // ID del kit principal
+          lab_product_id: labProduct.id, // Usar el ID del producto encontrado
           quantity_per_kit: material.quantity_per_kit,
         },
       });

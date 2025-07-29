@@ -19,12 +19,12 @@ module.exports = {
     "indicators_markdown": "- Se integra espontáneamente en juegos grupales.\n\n- Nombra algunas características de personas, animales y plantas en diferentes etapas de su proceso de crecimiento.\n\n- Practica algunas normas de convivencia democrática (escucha de opiniones divergentes, el respeto por los demás, los turnos, los acuerdos de la mayoría) ante la sugerencia de un adulto o par.",
     "assessment_markdown": "- ¿Reconoce hábitats de animales?\n- ¿Participa en la actividad grupal?\n- ¿Nombra características de los animales?\n- ¿Respeta turnos y opiniones?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1oxTbRqWMA0t2uws5YWen2kVdMQB-Eiy0/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/1LHrVhtwl77D6IQFTBHXv5ZswxSBc0QtH/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://drive.google.com/file/d/1qzmZOsGvIkdR9aXBD1C0i5oKxD1EYkqQ/view?usp=drive_link",
-      "https://docs.google.com/document/d/1gJUuQ-OdGn_M2P3ju_TKRM0rBn0-yBHD/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/presentation/d/1LHrVhtwl77D6IQFTBHXv5ZswxSBc0QtH/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1gJUuQ-OdGn_M2P3ju_TKRM0rBn0-yBHD/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/presentation/d/1oxTbRqWMA0t2uws5YWen2kVdMQB-Eiy0/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://drive.google.com/file/d/1qzmZOsGvIkdR9aXBD1C0i5oKxD1EYkqQ/view?usp=sharing"
     ],
-    "cover_image_url": "https://i.imgur.com/3MTaG0S.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/1LHrVhtwl77D6IQFTBHXv5ZswxSBc0QtH/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 7",

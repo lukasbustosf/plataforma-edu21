@@ -18,10 +18,10 @@ module.exports = {
     "indicators_markdown": "- Agrupa elementos por tres atributos que tienen en común (como forma, color, tamaño, función, masa o materialidad, entre otros), usando material concreto y pictórico.\n\n- Nombra los criterios que usó al clasificar elementos, por tres atributos a la vez, usando material concreto y pictórico.\n\n- Describe algunas semejanzas y diferencias al comparar objetos, considerando tres atributos a la vez.\n\n- Acepta propuestas de otros para lograr propósitos comunes en actividades o juegos colaborativos en los que participa.",
     "assessment_markdown": "- ¿Recuerda ubicación de fichas iguales?\n- ¿Participa en juegos colaborativos?\n- ¿Clasifica por atributos?\n- ¿Acepta propuestas de otros?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1Cp7WJfhT_fgZUVh7hUO-gSiEWuFEc_n3/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/1wFsCWxkQNbss1CIwq38GAOsUKrPQ819A/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/presentation/d/1Cp7WJfhT_fgZUVh7hUO-gSiEWuFEc_n3/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1wFsCWxkQNbss1CIwq38GAOsUKrPQ819A/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example6.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/1Cp7WJfhT_fgZUVh7hUO-gSiEWuFEc_n3/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 1",

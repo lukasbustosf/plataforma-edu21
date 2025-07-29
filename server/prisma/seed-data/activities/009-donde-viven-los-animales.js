@@ -18,11 +18,11 @@ module.exports = {
     "indicators_markdown": "- Explica instrucciones para realizar diversas actividades o juegos colaborativos.\n\n- Explica la relación entre las características de algunos animales y su hábitat.",
     "assessment_markdown": "- ¿Reconoce hábitats de animales?\n- ¿Explica relación entre animales y hábitat?\n- ¿Participa en actividades colaborativas?\n- ¿Sigue instrucciones correctamente?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1CFHxZ2b9PcthwL18CR-GHsBevvwLCWHt/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/1A45IciYv755D40ooYGCb3aC32BoPaMNf/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://drive.google.com/file/d/1d-fWjpzq4vph22Iwues6A1TC1dL_rNm5/view?usp=drive_link"
+      "https://docs.google.com/presentation/d/1A45IciYv755D40ooYGCb3aC32BoPaMNf/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/presentation/d/1CFHxZ2b9PcthwL18CR-GHsBevvwLCWHt/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://drive.google.com/file/d/1d-fWjpzq4vph22Iwues6A1TC1dL_rNm5/view?usp=sharing"
     ],
-    "cover_image_url": "https://i.imgur.com/example9.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/1A45IciYv755D40ooYGCb3aC32BoPaMNf/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 6",

@@ -18,10 +18,10 @@ module.exports = {
     "indicators_markdown": "- Explica la importancia de respetar los acuerdos de las mayorías, en situaciones cotidianas y juegos.\n\n- Lee las letras que componen algunas palabras sencillas, en diversos soportes.",
     "assessment_markdown": "- ¿Asocia fonemas y grafemas?\n- ¿Respeta acuerdos de mayorías?\n- ¿Lee letras en palabras sencillas?\n- ¿Participa en el juego colaborativo?",
     "resource_urls": [
-      "https://docs.google.com/document/d/1MyXfKl9Wc7HJVWmItB4ig0stWgi7kq_P/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/11JVlBfJiEI4I-lta7w4AnpiavgFerAXa/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/presentation/d/11JVlBfJiEI4I-lta7w4AnpiavgFerAXa/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1MyXfKl9Wc7HJVWmItB4ig0stWgi7kq_P/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example5.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/11JVlBfJiEI4I-lta7w4AnpiavgFerAXa/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 10",

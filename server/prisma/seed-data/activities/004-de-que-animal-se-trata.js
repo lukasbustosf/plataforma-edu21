@@ -18,12 +18,12 @@ module.exports = {
     "indicators_markdown": "- Respeta normas acordadas para la realización de actividades y juegos colaborativos.\n\n- Pronuncia correctamente palabras sencillas.\n\n- Utiliza en sus oraciones concordancia de género y de número.",
     "assessment_markdown": "- ¿Ejercita conciencia fonológica?\n- ¿Participa en las adivinanzas?\n- ¿Respeta turnos y normas?\n- ¿Pronuncia correctamente?",
     "resource_urls": [
-      "https://docs.google.com/presentation/d/1_jKxBfTuZNrEkDd8hPS92wilmL7oxku5/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/document/d/1gpt881zCMl93d6MvQYuUpdumWa1xChae/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://drive.google.com/file/d/1YP8WLqPxOkMd4XxR4c_5nauYrxOq3gf2/view?usp=drive_link",
-      "https://docs.google.com/presentation/d/10S0rTwshGVUn1VmmiN-CxegXqokY91D-/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/presentation/d/10S0rTwshGVUn1VmmiN-CxegXqokY91D-/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://drive.google.com/file/d/1YP8WLqPxOkMd4XxR4c_5nauYrxOq3gf2/view?usp=sharing",
+      "https://docs.google.com/presentation/d/1_jKxBfTuZNrEkDd8hPS92wilmL7oxku5/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1gpt881zCMl93d6MvQYuUpdumWa1xChae/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example4.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/10S0rTwshGVUn1VmmiN-CxegXqokY91D-/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 1"

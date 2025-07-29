@@ -18,11 +18,11 @@ module.exports = {
     "indicators_markdown": "- Describe las acciones que le ayudaron a lograr sus objetivos en un juego o situación cotidiana.\n\n- Describe características (reproducción, cubierta, desplazamiento, tamaño, morfología), necesidades básicas (alimentación y abrigo) y los lugares que habitan algunos animales.\n\n- Describe semejanzas y diferencias entre plantas y animales según sus características, necesidades de alimentación y hábitat.",
     "assessment_markdown": "- ¿Asocia sonidos con animales?\n- ¿Participa en la actividad grupal?\n- ¿Describe características de los animales?\n- ¿Comunica sus logros?",
     "resource_urls": [
-      "https://drive.google.com/file/d/1DFYMs3MgUD9iIYn2E768xVv_6FDyrHtx/view?usp=drive_link",
-      "https://docs.google.com/document/d/1yqJCijhibOqnxpHBBbZz1uiZySmDciFc/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/1bmPx2RKK5b3ZLhFulf76l0ljvYTTPVbe/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://drive.google.com/file/d/1DFYMs3MgUD9iIYn2E768xVv_6FDyrHtx/view?usp=sharing",
+      "https://docs.google.com/presentation/d/1bmPx2RKK5b3ZLhFulf76l0ljvYTTPVbe/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1yqJCijhibOqnxpHBBbZz1uiZySmDciFc/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example2.png",
+    "cover_image_url": "https://drive.google.com/file/d/1DFYMs3MgUD9iIYn2E768xVv_6FDyrHtx/view?usp=sharing",
     "video_url": "",
     "oa_ids": [
       "OA 6",

@@ -18,10 +18,10 @@ module.exports = {
     "indicators_markdown": "- Anticipa las dificultades u obstáculos que se podrían presentar al participar en juegos, proyectos o desafíos.\n\n- Nombra los criterios que usó al clasificar elementos, por tres atributos a la vez, usando material concreto y pictórico.",
     "assessment_markdown": "- ¿Nombra criterios de selección?\n- ¿Anticipa dificultades en juegos?\n- ¿Clasifica por atributos?\n- ¿Participa en el juego colaborativo?",
     "resource_urls": [
-      "https://docs.google.com/document/d/1Q4dxI9NVnQ_R7DF8r6iTKdZFnc-Ty4t3/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true",
-      "https://docs.google.com/presentation/d/1CXzQrfu8ocgkl4mCq0D1hZvUAYpe_z7M/edit?usp=drive_link&ouid=102711749563636743391&rtpof=true&sd=true"
+      "https://docs.google.com/presentation/d/1CXzQrfu8ocgkl4mCq0D1hZvUAYpe_z7M/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
+      "https://docs.google.com/document/d/1Q4dxI9NVnQ_R7DF8r6iTKdZFnc-Ty4t3/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true"
     ],
-    "cover_image_url": "https://i.imgur.com/example7.png",
+    "cover_image_url": "https://docs.google.com/presentation/d/1CXzQrfu8ocgkl4mCq0D1hZvUAYpe_z7M/edit?usp=sharing&ouid=116920741338788258588&rtpof=true&sd=true",
     "video_url": "",
     "oa_ids": [
       "OA 2",
