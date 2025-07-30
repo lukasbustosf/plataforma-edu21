@@ -109,7 +109,7 @@ async function upsertActivities(activities) {
       const activityRecord = {
         id: metadata.id,
         slug: metadata.slug,
-        title: metadata.title,
+        title: activity.title,
         description: activity.description,
         steps_markdown: activity.steps_markdown,
         learning_objectives: activity.learning_objectives,
