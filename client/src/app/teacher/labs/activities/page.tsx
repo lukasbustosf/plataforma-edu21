@@ -24,28 +24,97 @@ interface ActivityCardProps {
 const ActivityCard = ({ activity, onEdit, onDelete, currentUserId }: ActivityCardProps) => {
   const isCreator = activity.creator_id === currentUserId;
 
+  // Función para truncar texto largo
+  const truncateText = (text: string, maxLength: number = 120) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
+
+  // Función para extraer solo la instrucción general si está en markdown
+  const getShortDescription = (description: string) => {
+    if (!description) return 'Sin descripción disponible.';
+    
+    // Si contiene markdown, extraer solo el texto de la instrucción general
+    if (description.includes('## Instrucción General')) {
+      const generalSection = description.split('## Instrucción Específica')[0];
+      const cleanText = generalSection.replace('## Instrucción General', '').trim();
+      return truncateText(cleanText, 100);
+    }
+    
+    return truncateText(description, 100);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col">
-      <Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full">
-        <img src={activity.cover_image_url || 'https://via.placeholder.com/400x200.png?text=Actividad'} alt={activity.title || 'Actividad'} className="w-full h-40 object-cover" />
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full border border-gray-100">
+      <Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full group">
+        {/* Imagen mejorada - más vertical */}
+        <div className="relative h-56 w-full overflow-hidden">
+          <img 
+            src={activity.cover_image_url || 'https://via.placeholder.com/400x280.png?text=Actividad'} 
+            alt={activity.title || 'Actividad'} 
+            className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105" 
+          />
+          {/* Badge de nivel */}
+          {activity.target_cycle && (
+            <div className="absolute top-3 left-3">
+              <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                {activity.target_cycle}
+              </span>
+            </div>
+          )}
+          {/* Badge de duración */}
+          {activity.duration_minutes && (
+            <div className="absolute top-3 right-3">
+              <span className="bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                {activity.duration_minutes} min
+              </span>
+            </div>
+          )}
+        </div>
+        
         <div className="p-4 flex flex-col flex-grow">
-          <h3 className="text-lg font-bold text-gray-800 mb-2">{activity.title || 'Actividad sin título'}</h3>
-          <p className="text-gray-600 text-sm mb-3 flex-grow">{activity.description || 'Sin descripción disponible.'}</p>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {activity.tags?.map((tag: any) => (
-              <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                {tag}
+          {/* Título */}
+          <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+            {activity.title || 'Actividad sin título'}
+          </h3>
+          
+          {/* Descripción truncada */}
+          <p className="text-gray-600 text-sm mb-3 flex-grow line-clamp-3 leading-relaxed">
+            {getShortDescription(activity.description)}
+          </p>
+          
+          {/* Tags/OAs */}
+          <div className="flex flex-wrap gap-1 mb-3">
+            {activity.oa_ids?.slice(0, 2).map((oa: any, index: number) => (
+              <span key={index} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                {oa}
               </span>
             ))}
+            {activity.oa_ids?.length > 2 && (
+              <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                +{activity.oa_ids.length - 2} más
+              </span>
+            )}
           </div>
+          
+          {/* Metadatos */}
           <div className="border-t border-gray-200 pt-3 mt-auto">
-              <div className="flex justify-between text-xs text-gray-500">
-                  <span>{activity.target_cycle}</span>
-                  <span>{activity.duration_minutes ? `${activity.duration_minutes} min` : ''}</span>
-              </div>
+            <div className="flex justify-between text-xs text-gray-500">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                {activity.subject || 'Pre-Kínder'}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                {activity.group_size ? `${activity.group_size} estudiantes` : 'Grupo completo'}
+              </span>
+            </div>
           </div>
         </div>
       </Link>
+      
+      {/* Botones de acción */}
       {isCreator && (
         <div className="p-2 bg-gray-50 border-t border-gray-200 flex justify-end space-x-2">
           <Button variant="secondary" size="sm" onClick={() => onEdit(activity.id)}>

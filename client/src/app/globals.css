@@ -763,4 +763,72 @@
 
 .tts-feedback.incorrect {
   @apply border-red-500 bg-red-50;
+}
+
+/* ============================
+   Line Clamp Utilities
+   ============================ */
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.line-clamp-4 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.line-clamp-5 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+/* Fallback para navegadores que no soportan line-clamp */
+@supports not (-webkit-line-clamp: 1) {
+  .line-clamp-1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .line-clamp-2,
+  .line-clamp-3,
+  .line-clamp-4,
+  .line-clamp-5 {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2::after,
+  .line-clamp-3::after,
+  .line-clamp-4::after,
+  .line-clamp-5::after {
+    content: '...';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: white;
+    padding-left: 4px;
+  }
 } 
