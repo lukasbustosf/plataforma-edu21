@@ -63,8 +63,8 @@ const getShortDescription = (description: string) => {
 
 #### Estructura HTML Mejorada:
 ```jsx
-<div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
-  <Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full">
+<div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full border border-gray-100">
+  <Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full group">
     {/* Imagen mejorada - más vertical */}
     <div className="relative h-56 w-full overflow-hidden">
       <img 
@@ -298,4 +298,58 @@ maxLength: number = 120 → maxLength: number = 150
 - **Tiempo de carga**: Reducido por imágenes optimizadas
 - **Usabilidad**: Mejorada con información más clara
 - **Accesibilidad**: Mejorada con mejor contraste y jerarquía
-- **Responsive**: Funciona bien en móvil y desktop 
+- **Responsive**: Funciona bien en móvil y desktop
+
+## 🆕 Mejoras Adicionales Implementadas
+
+### **Versión 2.0 - Mejoras Visuales Avanzadas**
+
+#### 1. **Imágenes Más Verticales**
+- **Altura aumentada**: De `h-48` (192px) a `h-56` (224px)
+- **Mejor proporción**: Más atractiva visualmente
+- **Placeholder mejorado**: `400x280` en lugar de `400x200`
+
+#### 2. **Información de Asignatura Mejorada**
+- **Valor por defecto**: "Pre-Kínder" en lugar de "Sin asignatura"
+- **Más relevante**: Refleja el nivel real de las actividades
+
+#### 3. **Información de Estudiantes Mejorada**
+- **Texto dinámico**: `${group_size} estudiantes` cuando hay datos
+- **Fallback mejorado**: "Grupo completo" en lugar de "N/A"
+- **Más descriptivo**: Información más clara para el usuario
+
+#### 4. **Efectos Visuales Avanzados**
+- **Gradientes en badges**: `bg-gradient-to-r from-blue-600 to-blue-700`
+- **Sombras mejoradas**: `shadow-md` en badges
+- **Animación de elevación**: `hover:-translate-y-1`
+- **Cambio de color en hover**: `group-hover:text-blue-600`
+- **Bordes redondeados**: `rounded-xl` en lugar de `rounded-lg`
+- **Sombras más pronunciadas**: `shadow-2xl` en hover
+
+#### 5. **Diseño Moderno**
+- **Bordes sutiles**: `border border-gray-100`
+- **Transiciones suaves**: `transition-all duration-300`
+- **Efectos de grupo**: Uso de `group` para efectos coordinados
+
+### **Código de las Mejoras Adicionales:**
+
+```jsx
+// Contenedor principal mejorado
+<div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full border border-gray-100">
+
+// Link con grupo para efectos coordinados
+<Link href={`/teacher/labs/activity/${activity.slug}`} className="flex flex-col h-full group">
+
+// Imagen más vertical
+<div className="relative h-56 w-full overflow-hidden">
+
+// Badges con gradientes y sombras
+<span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+
+// Título con efecto hover
+<h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+
+// Metadatos mejorados
+{activity.subject || 'Pre-Kínder'}
+{activity.group_size ? `${activity.group_size} estudiantes` : 'Grupo completo'}
+``` 
